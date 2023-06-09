@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const accountSchema = new mongoose.Schema({
   accountNumber: String,
   // Other fields...
+  //
 });
 
 // Create a model based on the schema
