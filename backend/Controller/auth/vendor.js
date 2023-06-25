@@ -112,6 +112,48 @@ class vendorProfile {
     }
   }
 
+  async postsubcategory(req, res) {
+    let { businesstype } = req.body;
+    let vendorprofile = await VendorModel.find({ businesstype }).sort({
+      _id: -1,
+    });
+
+    if (vendorprofile) {
+      return res.json({ vendorprofile: vendorprofile });
+    }
+  }
+
+  // async vendorLogin(req, res) {
+  //   let { email, password, customNumber } = req.body;
+  //   try {
+  //     if (!email || !password || !customNumber) {
+  //       return res.status(500).json({ error: "Please fill all fields" });
+  //     } else {
+  //       const data = await VendorModel.findOne({ email: email });
+  //       const EnquiryNumber = await VendorModel.findOne({
+  //         customNumber: customNumber,
+  //       });
+  //       if (!data) {
+  //         return res.status(500).json({ error: "Invalid email id" });
+  //       } else if (!EnquiryNumber) {
+  //         return res
+  //           .status(500)
+  //           .json({ error: "Enquiry Number already exits" });
+  //       } else {
+  //         const passcheck = bcrypt.compare(password, data.password);
+  //         if (passcheck) {
+  //           VendorModel.findOneAndUpdate({ email }, { status: "Online" });
+  //           return res.json({ Success: "Signin successful", user: data });
+  //         } else {
+  //           return res.status(500).json({ error: "Invalid Password" });
+  //         }
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+
   async vendorLogin(req, res) {
     let { email, password } = req.body;
     try {

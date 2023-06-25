@@ -22,6 +22,8 @@ const subcatagoryroute = require("./Routes/product/subcatagory");
 const productlistroute = require("./Routes/product/productList");
 const bannerroute = require("./Routes/admin/banner");
 const authotprouter = require("./Routes/auth/otp");
+const servicescatagoryroute = require("./Routes/Services/Category");
+const servicessubcatagoryroute = require("./Routes/Services/Subcategory");
 
 //middleware
 app.use(morgan("dev"));
@@ -37,6 +39,8 @@ app.use("/api/vendor/product/subcatagory", subcatagoryroute);
 app.use("/api/product", productlistroute);
 app.use("/api/admin", bannerroute);
 app.use("/api", authotprouter);
+app.use("/api/vendor/services/catagory", servicescatagoryroute);
+app.use("/api/vendor/services/subcatagory", servicessubcatagoryroute);
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");

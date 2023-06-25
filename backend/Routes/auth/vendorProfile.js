@@ -15,6 +15,7 @@ var storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 router.post("/signup", vendorProfileController.createAccount);
 router.post("/login", vendorProfileController.vendorLogin);
+router.post("/postsubcategory", vendorProfileController.postsubcategory);
 router.post(
   "/uploaddocument/:id",
   upload.any(),

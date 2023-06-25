@@ -54,6 +54,38 @@ class ProductList {
       console.log(err);
     }
   }
+
+  async getProduct(req, res) {
+    try {
+      let product = await ProductListModel.find({});
+      if (product) {
+        return res.json({ productData: product });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  // how to write update product api for this?
+  // async editProduct(req, res) {
+  //   const {
+  //     productName,
+  //     ProductPrice,
+  //     productDescription,
+  //     productQuantity,
+  //     productStatus,
+  //     ProductBrand,
+  //     productSize,
+  //     productDiscount,
+  //   } = req.body;
+  //   let file = req.file?.filename;
+  //   const user = await ProductListModel.findOneAndUpdate(
+  //     { _id: productid },
+  //     { $set: obj },
+  //     {
+  //       new: true,
+  //     }
+  //   );
+  // }
 }
 
 const ProductListController = new ProductList();

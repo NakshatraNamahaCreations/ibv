@@ -20,5 +20,6 @@ router.post(
   ProductListController.AddProduct
 );
 router.get("/getcatagory", ProductListController.getcatagory);
+router.get("/getproduct", ProductListController.getProduct);
 
 module.exports = router;

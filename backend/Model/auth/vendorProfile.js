@@ -24,7 +24,7 @@ const Vendor = new Schema({
     type: Number,
   },
   panNumber: {
-    type: Number,
+    type: String,
   },
   dob: {
     type: String,

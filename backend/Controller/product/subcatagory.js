@@ -33,13 +33,30 @@ class SubCatagory {
   }
 
   async postsubcategory(req, res) {
-    let { categoryName } = req.body;
-    let data = await SubcatagoryModel.find({ categoryName }).sort({
+    let { catagoryName } = req.body;
+    let subcategory = await SubcatagoryModel.find({ catagoryName }).sort({
       _id: -1,
     });
-    console.log(data);
-    if (data) {
-      return res.json({ subcategory: data });
+    console.log(subcategory);
+    if (subcategory) {
+      return res.json({ subcategory: subcategory });
+    }
+  }
+
+  async getSubcategoriesByCategory(req, res) {
+    const catagoryName = req.params.categoryId;
+    try {
+      const subcategories = await SubcatagoryModel.find({ catagoryName }).sort({
+        _id: -1,
+      });
+      if (subcategories) {
+        console.log("catagoryName", catagoryName);
+        return res.json({ subcategories: subcategories });
+      }
+    } catch (err) {
+      console.log(err);
+
+      return res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
