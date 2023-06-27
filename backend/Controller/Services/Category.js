@@ -1,5 +1,5 @@
 const ServiceCategoryModel = require("../../Model/Services/Category");
-
+//new
 class Catagory {
   async Addcatagoryservices(req, res) {
     let { categoryname } = req.body;
