@@ -9,6 +9,7 @@ class SubCatagory {
         SubcatagoryImage: file,
         SubcatagoryName,
         catagoryName,
+        businesstype: "Categoryes",
       });
       if (!file) {
         return res.status(500).json({

@@ -27,5 +27,6 @@ router.post(
   "/deleteservicecatagory/:catagoryid",
   catagoryserviceController.deleteserviceCatagory
 );
+router.post("/postsercat", catagoryserviceController.postcategory);
 
 module.exports = router;

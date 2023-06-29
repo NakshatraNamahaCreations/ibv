@@ -1,5 +1,5 @@
 const ServiceCategoryModel = require("../../Model/Services/Category");
-//new
+
 class Catagory {
   async Addcatagoryservices(req, res) {
     let { categoryname } = req.body;
@@ -8,6 +8,7 @@ class Catagory {
       let newCatagory = new ServiceCategoryModel({
         categoryimage: file,
         categoryname,
+        businesstype: "Services",
       });
       let newData = newCatagory.save();
       if (newData) {
@@ -30,6 +31,18 @@ class Catagory {
       }
     } catch (err) {
       console.log(err);
+    }
+  }
+  async postcategory(req, res) {
+    let { businesstype } = req.body;
+    let data = await ServiceCategoryModel.find({
+      businesstype,
+    }).sort({
+      _id: -1,
+    });
+
+    if (data) {
+      return res.json({ categoryservices: data });
     }
   }
 

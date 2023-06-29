@@ -8,6 +8,7 @@ class Catagory {
       let newCatagory = new catagoryModal({
         catagoryImage: file,
         catagoryName,
+        businesstype: "Products",
       });
       if (!file) {
         return res.status(500).json({
@@ -32,6 +33,23 @@ class Catagory {
       }
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  async postcategory(req, res) {
+    let { businesstype } = req.body;
+    let data = await catagoryModal
+      .find({
+        businesstype,
+      })
+      .sort({
+        _id: -1,
+      });
+
+    if (data) {
+      return res.json({ catagory: data });
+    } else {
+      return res.json({ error: "not able to complete" });
     }
   }
 

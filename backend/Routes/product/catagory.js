@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 const catagoryController = require("../../Controller/product/catagory");
@@ -21,5 +22,6 @@ router.post(
 );
 router.get("/getcatagory", catagoryController.getAllcatagory);
 router.post("/deletecatagory/:catagoryid", catagoryController.deleteCatagory);
+router.post("/postprocat", catagoryController.postcategory);
 
 module.exports = router;

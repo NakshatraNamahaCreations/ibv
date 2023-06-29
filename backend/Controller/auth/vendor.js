@@ -41,7 +41,6 @@ class vendorProfile {
         password,
         phoneNumber,
         alternativeNumber,
-        aadhaarNumber,
         dob,
         address,
         distric,
@@ -50,6 +49,11 @@ class vendorProfile {
         businessName,
         businesstype,
         category,
+        checkbox,
+        websiteaddress,
+        panimg,
+        panNumber,
+        selfie,
       } = req.body;
 
       // Find the current count from the database and increment it
@@ -100,6 +104,11 @@ class vendorProfile {
         businesstype,
         category,
         customNumber,
+        websiteaddress,
+        checkbox,
+        panimg,
+        panNumber,
+        selfie,
       });
       newVendor.save().then((data) => {
         console.log(data);
@@ -180,9 +189,10 @@ class vendorProfile {
   async uploaddocument(req, res) {
     try {
       let id = req.params.id;
-      let file = req.files[0].filename;
-      let file1 = req.files[1].filename;
-      let file2 = req.files[2].filename;
+      let file = req.files[0]?.filename;
+      let file1 = req.files[1]?.filename;
+      let file2 = req.files[2]?.filename;
+      let file3 = req.files[3]?.filename;
       let { aadhaarNumber, panNumber } = req.body;
       let data = await VendorModel.findByIdAndUpdate(
         { _id: id },
@@ -192,6 +202,7 @@ class vendorProfile {
           adharfrontendimg: file,
           adharbackendimg: file1,
           panimg: file2,
+          selfie: file3,
         }
       );
       if (data) {
@@ -201,28 +212,47 @@ class vendorProfile {
       console.log(error);
     }
   }
+  // async getSignout(req, res) {
+  //   let signout = req.params.id;
+  //   try {
+  //     await VendorModel.findOneAndUpdate(
+  //       { _id: signout },
+  //       { status: "Offline" }
+  //     )
+  //       .then((data) => {
+  //         return res.json({ Success: "Signout Successfully" });
+  //       })
+  //       .catch((err) => {
+  //         return res.status({ error: "Something went wrong" });
+  //       });
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+
   async getSignout(req, res) {
-    let signout = req.params.userid;
     try {
+      const signout = req.params.id;
+      if (!signout) {
+        return res.status(400).json({ error: "Invalid signout ID" });
+      }
+
       await VendorModel.findOneAndUpdate(
         { _id: signout },
         { status: "Offline" }
-      )
-        .then((data) => {
-          return res.json({ Success: "Signout Successfully" });
-        })
-        .catch((err) => {
-          return res.status({ error: "Something went wrong" });
-        });
+      );
+
+      res.json({ Success: "Signout Successfully" });
     } catch (error) {
       console.log(error);
+      res.status(500).json({ error: "Something went wrong" });
     }
   }
 
   async getAllUser(req, res) {
     try {
       let allUser = await VendorModel.find({});
-      res.json({ users: allUser });
+      res.json({ vendorprofile: allUser });
     } catch {
       res.status(404);
     }
