@@ -8,6 +8,9 @@ const categoryservices = new Schema({
   categoryimage: {
     type: String,
   },
+  businesstype: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),

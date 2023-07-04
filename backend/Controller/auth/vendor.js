@@ -4,36 +4,8 @@ const bcrypt = require("bcryptjs");
 // const generateSeriesNumber = require("../../Config/function");
 
 class vendorProfile {
-  // async function generateSeriesNumber(req, res) {
-  //   try {
-  //     // Find the latest account in the collection
-  //     const newUser = await VendorModel.findOne(
-  //       {},
-  //       {},
-  //       { sort: { seriesNumber: -1 } }
-  //     );
-
-  //     // Extract the series number from the latest account
-  //     let seriesNumber = 1;
-  //     if (newUser) {
-  //       const newUserNumber = newUser.seriesNumber;
-  //       seriesNumber = parseInt(newUserNumber.split("-")[1]) + 1;
-  //     }
-
-  //     // Generate the new account number with the series number
-  //     const newseriesNumber = `IM2023-${seriesNumber}`;
-  //     console.log("newseriesNumber=====", newseriesNumber);
-  //     return newseriesNumber;
-  //   } catch (error) {
-  //     console.error("Error generating series number:", error);
-  //     throw error;
-  //   }
-  // }
-
   async createAccount(req, res) {
     try {
-      // Generate the series number
-      // const uniqueNumber = await generateSeriesNumber();
       let {
         firstname,
         lastname,
@@ -56,7 +28,6 @@ class vendorProfile {
         selfie,
       } = req.body;
 
-      // Find the current count from the database and increment it
       let vendorCount = await VendorModel.findOneAndUpdate(
         {},
         { $inc: { count: 1 } },
@@ -132,37 +103,6 @@ class vendorProfile {
     }
   }
 
-  // async vendorLogin(req, res) {
-  //   let { email, password, customNumber } = req.body;
-  //   try {
-  //     if (!email || !password || !customNumber) {
-  //       return res.status(500).json({ error: "Please fill all fields" });
-  //     } else {
-  //       const data = await VendorModel.findOne({ email: email });
-  //       const EnquiryNumber = await VendorModel.findOne({
-  //         customNumber: customNumber,
-  //       });
-  //       if (!data) {
-  //         return res.status(500).json({ error: "Invalid email id" });
-  //       } else if (!EnquiryNumber) {
-  //         return res
-  //           .status(500)
-  //           .json({ error: "Enquiry Number already exits" });
-  //       } else {
-  //         const passcheck = bcrypt.compare(password, data.password);
-  //         if (passcheck) {
-  //           VendorModel.findOneAndUpdate({ email }, { status: "Online" });
-  //           return res.json({ Success: "Signin successful", user: data });
-  //         } else {
-  //           return res.status(500).json({ error: "Invalid Password" });
-  //         }
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
-
   async vendorLogin(req, res) {
     let { email, password } = req.body;
     try {
@@ -212,23 +152,6 @@ class vendorProfile {
       console.log(error);
     }
   }
-  // async getSignout(req, res) {
-  //   let signout = req.params.id;
-  //   try {
-  //     await VendorModel.findOneAndUpdate(
-  //       { _id: signout },
-  //       { status: "Offline" }
-  //     )
-  //       .then((data) => {
-  //         return res.json({ Success: "Signout Successfully" });
-  //       })
-  //       .catch((err) => {
-  //         return res.status({ error: "Something went wrong" });
-  //       });
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
 
   async getSignout(req, res) {
     try {
@@ -246,6 +169,26 @@ class vendorProfile {
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Something went wrong" });
+    }
+  }
+
+  async userupdate(req, res) {
+    let id = req.params.id;
+    let { firstname, lastname, email, password, phoneNumber } = req.body;
+    let data = await VendorModel.findOneAndUpdate(
+      { _id: id },
+      {
+        firstname,
+        lastname,
+        email,
+        password,
+        phoneNumber,
+      }
+    );
+    if (data) {
+      return res
+        .status(200)
+        .json({ Success: "Account created. Please login", user: data });
     }
   }
 
@@ -268,5 +211,4 @@ class vendorProfile {
 }
 
 const vendorProfileController = new vendorProfile();
-// export default vendorProfileController;
 module.exports = vendorProfileController;

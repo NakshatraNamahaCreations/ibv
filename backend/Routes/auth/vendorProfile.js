@@ -22,8 +22,9 @@ router.post(
 
   vendorProfileController.uploaddocument
 );
-router.get("/signout/:userid", vendorProfileController.getSignout);
+router.get("/signout/:id", vendorProfileController.getSignout);
 router.get("/getuser/:userid", vendorProfileController.getuser);
 router.get("/getalluser", vendorProfileController.getAllUser);
+router.post("/useredit/:id", vendorProfileController.userupdate);
 
 module.exports = router;

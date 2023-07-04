@@ -21,5 +21,6 @@ router.post(
 );
 router.get("/getcatagory", ProductListController.getcatagory);
 router.get("/getproduct", ProductListController.getProduct);
+router.post("/productsbyuserid", ProductListController.getProductByUserId);
 
 module.exports = router;

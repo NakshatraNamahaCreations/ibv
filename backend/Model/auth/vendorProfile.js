@@ -88,9 +88,6 @@ const Vendor = new Schema({
     type: Date,
     default: Date.now(),
   },
-  vendorstatus:{
-    type:String
-  }
 });
 
 const VendorModel = mongoose.model("vendorprofile", Vendor);

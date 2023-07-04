@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const catagoryController = require("../../Controller/product/catagory");

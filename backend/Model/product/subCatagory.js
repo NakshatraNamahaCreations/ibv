@@ -20,6 +20,9 @@ const Subcatagory = new Schema({
   catagoryName: {
     type: String,
   },
+  businesstype: {
+    type: String,
+  },
 });
 
 const SubcatagoryModel = mongoose.model("subcatagory", Subcatagory);

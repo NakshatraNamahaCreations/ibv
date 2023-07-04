@@ -17,6 +17,9 @@ const Subcatagoryservices = new Schema({
     type: Date,
     default: Date.now(),
   },
+  businesstype: {
+    type: String,
+  },
   catagoryName: {
     type: String,
   },
