@@ -15,16 +15,14 @@ var storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 router.post("/signup", vendorProfileController.createAccount);
 router.post("/login", vendorProfileController.vendorLogin);
-router.post("/postsubcategory", vendorProfileController.postsubcategory);
 router.post(
   "/uploaddocument/:id",
   upload.any(),
 
   vendorProfileController.uploaddocument
 );
-router.get("/signout/:id", vendorProfileController.getSignout);
+router.get("/signout/:userid", vendorProfileController.getSignout);
 router.get("/getuser/:userid", vendorProfileController.getuser);
 router.get("/getalluser", vendorProfileController.getAllUser);
-router.post("/useredit/:id", vendorProfileController.userupdate);
 
 module.exports = router;

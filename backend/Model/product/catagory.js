@@ -8,9 +8,6 @@ const Catagory = new Schema({
   catagoryImage: {
     type: String,
   },
-  businesstype: {
-    type: String,
-  },
 
   createdAt: {
     type: Date,

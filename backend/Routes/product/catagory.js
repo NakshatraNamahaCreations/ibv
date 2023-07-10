@@ -21,6 +21,5 @@ router.post(
 );
 router.get("/getcatagory", catagoryController.getAllcatagory);
 router.post("/deletecatagory/:catagoryid", catagoryController.deleteCatagory);
-router.post("/postprocat", catagoryController.postcategory);
 
 module.exports = router;

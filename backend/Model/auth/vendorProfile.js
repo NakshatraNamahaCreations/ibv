@@ -24,7 +24,7 @@ const Vendor = new Schema({
     type: Number,
   },
   panNumber: {
-    type: String,
+    type: Number,
   },
   dob: {
     type: String,
@@ -32,9 +32,7 @@ const Vendor = new Schema({
   address: {
     type: String,
   },
-  selfie: {
-    type: String,
-  },
+
   distric: {
     type: String,
   },
@@ -66,9 +64,6 @@ const Vendor = new Schema({
   panimg: {
     type: String,
   },
-  selfie: {
-    type: String,
-  },
   customNumber: {
     type: String,
     require: true,
@@ -77,12 +72,6 @@ const Vendor = new Schema({
   count: {
     type: Number,
     default: 0,
-  },
-  checkbox: {
-    type: Boolean,
-  },
-  websiteaddress: {
-    type: String,
   },
   createAt: {
     type: Date,
