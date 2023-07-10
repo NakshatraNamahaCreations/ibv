@@ -65,6 +65,44 @@ class ProductList {
       console.log(err);
     }
   }
+
+  async getProductByUserId(req, res) {
+    try {
+      let { userId } = req.body;
+      const userProducts = await ProductListModel.find({
+        userId,
+      });
+      // .sort({ _id });
+      console.log("userProducts", userProducts);
+      if (userProducts.length > 0) {
+        return res.json({ getUserProduct: userProducts });
+      } else {
+        return res.json({ getUserProduct: [] });
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Failed to fetch user products" });
+    }
+  }
+
+  async getProductByUserId(req, res) {
+    try {
+      let { userId } = req.body;
+      const userProducts = await ProductListModel.find({
+        userId,
+      });
+      // .sort({ _id });
+      console.log("userProducts", userProducts);
+      if (userProducts.length > 0) {
+        return res.json({ getUserProduct: userProducts });
+      } else {
+        return res.json({ getUserProduct: [] });
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Failed to fetch user products" });
+    }
+  }
 }
 
 const ProductListController = new ProductList();

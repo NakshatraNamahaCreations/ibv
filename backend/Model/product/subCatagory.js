@@ -9,15 +9,18 @@ const Subcatagory = new Schema({
   SubcatagoryImage: {
     type: String,
   },
-  // catagoryId: {
-  //   type: ObjectId,
-  //   ref: "catagories",
-  // },
+  catagoryId: {
+    type: ObjectId,
+    ref: "catagories",
+  },
   // createdAt: {
   //   type: Date,
   //   default: Date.now(),
   // },
   catagoryName: {
+    type: String,
+  },
+  businesstype: {
     type: String,
   },
 });

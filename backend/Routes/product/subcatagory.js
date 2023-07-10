@@ -20,8 +20,12 @@ router.post(
   SubCatagoryController.AddSubcatagory
 );
 router.get("/getsubcatagory", SubCatagoryController.getsubcategory);
-router.post("/postsubcatagory", SubCatagoryController.postsubcategory);
+router.get(
+  "/getSubcategoriesByCategory/:categoryId",
+  SubCatagoryController.getSubcategoriesByCategory
+);
 router.get("/getallsubcatagory", SubCatagoryController.getAllSubcatagory);
+router.post("/postsubcatagory", SubCatagoryController.postsubcategory);
 router.post(
   "/deletesubcatagory/:subcatagoryid",
   SubCatagoryController.deleteSubCatagory
