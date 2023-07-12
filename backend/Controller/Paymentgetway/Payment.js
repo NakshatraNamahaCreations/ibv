@@ -1,7 +1,8 @@
 const axios = require("axios");
 const { encrypt } = require("crypto");
-
+const sha256 = require("sha256");
 const Paymentgetwaymodel = require("../../Model/Paymnetgetway/Payment");
+const generateUniqueTransactionId = require("../../Config/tractionid");
 
 class Paymentgetway {
   // async addPayment(req, res) {
@@ -157,6 +158,14 @@ class Paymentgetway {
       { status },
       { new: true }
     );
+    const newVendor = new Paymentgetwaymodel({
+      transactionId,
+      status,
+    });
+    newVendor.save().then((data) => {
+      console.log(data);
+      return res.status(200).json({ Success: "payemnt succesfully" });
+    });
 
     res.json({ success: true });
   }
@@ -170,33 +179,77 @@ class Paymentgetway {
     res.json(payment);
   }
 
+  // async initiatePayment(req, res) {
+  //   try {
+  //     let data = JSON.stringify({
+  //       request:
+  //         "ewoJIm1lcmNoYW50SWQiOiAiUEdURVNUUEFZVUFUNzYiLAoJIm1lcmNoYW50VHJhbnNhY3Rpb25JZCI6ICJNVDc4NTA1c2U5MDA2ODc3NDg5NzQiLAoJIm1lcmNoYW50VXNlcklkIjogIk1VSUQxMjM3NDVldzYiLAoJImFtb3VudCI6IDEwMDAwLAoJInJlZGlyZWN0VXJsIjogImh0dHBzOi8vd2ViaG9vay5zaXRlL3JlZGlyZWN0LXVybCIsCgkicmVkaXJlY3RNb2RlIjogIlBPU1QiLAoJImNhbGxiYWNrVXJsIjogImh0dHBzOi8vd2ViaG9vay5zaXRlL2NhbGxiYWNrLXVybCIsCgkibW9iaWxlTnVtYmVyIjogIjk5OTk5OTk5OTkiLAoJInBheW1lbnRJbnN0cnVtZW50IjogewoJCSJ0eXBlIjogIlBBWV9QQUdFIgoJfQp9",
+  //     });
+
+  //     let config = {
+  //       method: "post",
+  //       maxBodyLength: Infinity,
+  //       url: "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "X-VERIFY":
+  //           "57996644cde4ca37bfe0ae8812b3d8324befad01b18694b0e24d5bce6a88996e###1",
+  //       },
+  //       data: data,
+  //     };
+
+  //     axios
+  //       .request(config)
+  //       .then((response) => {
+  //         console.log(JSON.stringify(response.data));
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //       });
+  //   } catch (error) {
+  //     console.error("Error logging in:", error);
+  //     res.status(500).json({ message: "Login failed. Please try again." });
+  //   }
+  // }
+
+  // function generateUniqueTransactionId() {
+  //   // Implement your logic to generate a unique transaction ID
+  //   // You can use a library like uuid to generate a unique ID
+
+  //   // Example using uuid:
+  //   const { v4: uuidv4 } = require('uuid');
+  //   const transactionId = uuidv4();
+
+  //   return transactionId;
+  // }
   async initiatePayment(req, res) {
+    const { v4: uuidv4 } = require("uuid");
+    const transactionId = uuidv4();
+    console.log("id", transactionId);
+
+    // const { navigation } = req;
     try {
-      let data = JSON.stringify({
-        request:
-          "ewoJIm1lcmNoYW50SWQiOiAiUEdURVNUUEFZVUFUNzYiLAoJIm1lcmNoYW50VHJhbnNhY3Rpb25JZCI6ICJNVDc4NTA1c2U5MDA2ODc3NDg5NzQiLAoJIm1lcmNoYW50VXNlcklkIjogIk1VSUQxMjM3NDVldzYiLAoJImFtb3VudCI6IDEwMDAwLAoJInJlZGlyZWN0VXJsIjogImh0dHBzOi8vd2ViaG9vay5zaXRlL3JlZGlyZWN0LXVybCIsCgkicmVkaXJlY3RNb2RlIjogIlBPU1QiLAoJImNhbGxiYWNrVXJsIjogImh0dHBzOi8vd2ViaG9vay5zaXRlL2NhbGxiYWNrLXVybCIsCgkibW9iaWxlTnVtYmVyIjogIjk5OTk5OTk5OTkiLAoJInBheW1lbnRJbnN0cnVtZW50IjogewoJCSJ0eXBlIjogIlBBWV9QQUdFIgoJfQp9",
-      });
-
-      let config = {
-        method: "post",
-        maxBodyLength: Infinity,
-        url: "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay",
-        headers: {
-          "Content-Type": "application/json",
-          "X-VERIFY":
-            "57996644cde4ca37bfe0ae8812b3d8324befad01b18694b0e24d5bce6a88996e###1",
-        },
-        data: data,
-      };
-
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
+      let base64 = Buffer.from(
+        JSON.stringify({
+          merchantId: "INFINITYBVONLINE",
+          merchantTransactionId: transactionId,
+          merchantUserId: "MUIDSX123",
+          amount: 100,
+          redirectUrl: "/bottomtab",
+          redirectMode: "POST",
+          callbackUrl: "http://192.168.1.67:8000/api/payment/callback",
+          mobileNumber: "8951592630",
+          paymentInstrument: {
+            type: "PAY_PAGE",
+          },
         })
-        .catch((error) => {
-          console.log(error);
-        });
+      ).toString("base64");
+      console.log("base64===", base64);
+      let sha256encode =
+        sha256(base64 + "/pg/v1/payc3fc2cbb-e95e-490a-97ed-05533e9f73e3") +
+        "###1";
+      console.log("sha256encode===", sha256encode);
+      res.status(200).json({ base64, sha256encode });
     } catch (error) {
       console.error("Error logging in:", error);
       res.status(500).json({ message: "Login failed. Please try again." });
