@@ -26,6 +26,14 @@ class vendorProfile {
         panimg,
         panNumber,
         selfie,
+        gst,
+        referalCode,
+        accountname,
+        accountnumber,
+        latitude,
+        longitude,
+        categoryname,
+        // referalCode,
       } = req.body;
 
       let vendorCount = await VendorModel.findOneAndUpdate(
@@ -47,6 +55,7 @@ class vendorProfile {
 
       // Generate the custom number
       const customNumber = `IM2023${vendorCount.count}`;
+      const myreferalCode = `REFIM2023${vendorCount.count}`;
 
       password = bcrypt.hashSync(password, 10);
       // firstname = toTitleCase(firstname);
@@ -75,11 +84,19 @@ class vendorProfile {
         businesstype,
         category,
         customNumber,
+        referalCode,
+        myreferalCode,
         websiteaddress,
         checkbox,
         panimg,
         panNumber,
         selfie,
+        gst,
+        accountname,
+        accountnumber,
+        latitude,
+        longitude,
+        categoryname,
       });
       newVendor.save().then((data) => {
         console.log(data);
@@ -87,6 +104,19 @@ class vendorProfile {
           .status(200)
           .json({ Success: "Account created. Please login", user: data });
       });
+      // const apiKey = "YOUR_GOOGLE_MAPS_API_KEY";
+      // const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
+      // axios
+      //   .get(geocodingUrl)
+      //   .then((response) => {
+      //     const address = response.data.results[0].formatted_address;
+      //     // Respond with the address to the client
+      //     res.json({ address });
+      //   })
+      //   .catch((error) => {
+      //     console.error(error);
+      //     res.status(500).json({ error: "Error fetching address" });
+      //   });
     } catch (error) {
       console.error("Error creating account:", error);
     }

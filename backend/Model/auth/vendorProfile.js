@@ -84,6 +84,30 @@ const Vendor = new Schema({
   websiteaddress: {
     type: String,
   },
+  gst: {
+    type: String,
+  },
+  accountname: {
+    type: String,
+  },
+  accountnumber: {
+    type: String,
+  },
+  categoryname: {
+    type: String,
+  },
+  latitude: {
+    type: Number,
+  },
+  longitude: {
+    type: Number,
+  },
+  referalCode: {
+    type: String,
+  },
+  myreferalCode: {
+    type: String,
+  },
   createAt: {
     type: Date,
     default: Date.now(),
