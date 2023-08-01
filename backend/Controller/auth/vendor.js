@@ -104,19 +104,6 @@ class vendorProfile {
           .status(200)
           .json({ Success: "Account created. Please login", user: data });
       });
-      // const apiKey = "YOUR_GOOGLE_MAPS_API_KEY";
-      // const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
-      // axios
-      //   .get(geocodingUrl)
-      //   .then((response) => {
-      //     const address = response.data.results[0].formatted_address;
-      //     // Respond with the address to the client
-      //     res.json({ address });
-      //   })
-      //   .catch((error) => {
-      //     console.error(error);
-      //     res.status(500).json({ error: "Error fetching address" });
-      //   });
     } catch (error) {
       console.error("Error creating account:", error);
     }
@@ -217,22 +204,21 @@ class vendorProfile {
   }
 
   async getSignout(req, res) {
-    try {
-      const signout = req.params.id;
-      if (!signout) {
-        return res.status(400).json({ error: "Invalid signout ID" });
-      }
-
-      await VendorModel.findOneAndUpdate(
-        { _id: signout },
-        { status: "Offline" }
-      );
-
-      res.json({ Success: "Signout Successfully" });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: "Something went wrong" });
+    const signoutId = req.params.id;
+    if (!signoutId) {
+      return res.status(400).json({ error: "Invalid signout ID" });
     }
+
+    // Simulate an error by trying to find the Vendor with the provided ID
+    // Replace this line with your actual database query, which should return a promise
+    VendorModel.findOneAndUpdate({ _id: signoutId }, { status: "Offline" })
+      .then(() => {
+        res.json({ Success: "Signout Successfully" });
+      })
+      .catch((error) => {
+        console.log(error);
+        res.status(500).json({ error: "Something went wrong" });
+      });
   }
 
   async userupdate(req, res) {

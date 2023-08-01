@@ -2,12 +2,13 @@ const bannerModel = require("../../Model/admin/banner");
 
 class banner {
   async postbanner(req, res) {
-    let { content } = req.body;
+    let { content, userId } = req.body;
     let file = req.file?.filename;
     try {
       let newbanner = new bannerModel({
         bannerImage: file,
         content: content,
+        userId: userId,
       });
       let save = newbanner.save();
       if (save) {
