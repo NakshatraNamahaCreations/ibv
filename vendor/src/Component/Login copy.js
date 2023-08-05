@@ -8,6 +8,8 @@ import "react-notifications/lib/notifications.css";
 import createNotification from "./reactNotification";
 
 export function Login() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const { toggle, handleshow, handlehide } = useContext(CreateToggle);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +24,7 @@ export function Login() {
     } else {
       try {
         const config = {
-          url: "http://localhost:8000/api/vendor/login",
+          url: apiURL+"/vendor/login",
           method: "POST",
           headers: { "content-type": "application/json" },
           data: {

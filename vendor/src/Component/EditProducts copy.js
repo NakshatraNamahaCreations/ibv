@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 function EditProducts() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [catagorydata, setCatagorydata] = useState([]);
   const [selectedCatagoryId, setSelectedCatagoryId] = useState(null);
   const [subcatagorydata, setSubCatagorydata] = useState([]);
@@ -18,7 +20,7 @@ function EditProducts() {
   const getAllCatagory = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8000/api/vendor/product/catagory/getcatagory"
+        apiURL+"/vendor/product/catagory/getcatagory"
       );
       if (res.status === 200) {
         console.log("catagory===", res);
@@ -33,7 +35,7 @@ function EditProducts() {
   }, []);
 
   const getAllProduct = async () => {
-    let res = await axios.get("http://localhost:8000/api/product/getproduct");
+    let res = await axios.get(apiURL+"/product/getproduct");
     if (res.status === 200) {
       console.log("productList===", res);
       setproductData(res.data?.productData);
@@ -43,7 +45,7 @@ function EditProducts() {
   const getAllSubCatagory = async (categoryId) => {
     try {
       let res = await axios.get(
-        `http://localhost:8000/api/vendor/product/subcatagory/getSubcategoriesByCategory/${categoryId}`
+        apiURL+`/vendor/product/subcatagory/getSubcategoriesByCategory/${categoryId}`
       );
       if (res.status === 200) {
         console.log("subcatagory===", res);

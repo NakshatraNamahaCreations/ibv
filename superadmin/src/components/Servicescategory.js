@@ -10,7 +10,6 @@ import ReactPaginate from "react-paginate";
 
 function Servicescategory() {
   const apiURL = process.env.REACT_APP_API_URL;
-  
   const imgURL = process.env.REACT_APP_IMAGE_API_URL;
 
   const [catagoryname, setCatagoryname] = useState("");

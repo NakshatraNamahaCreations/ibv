@@ -146,7 +146,7 @@ function Category() {
                 <td className="text-center">{data.catagoryName} </td>
                 <td className="text-center" style={{ textAlign: "center" }}>
                   <img
-                    src={`http://localhost:8000/catagory/${data.catagoryImage}`}
+                    src={imgURL+`/catagory/${data.catagoryImage}`}
                     alt=""
                     width="15%"
                   />

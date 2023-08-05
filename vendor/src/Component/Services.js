@@ -14,6 +14,8 @@ const active = {
 };
 const inactive = { color: "black", backgroundColor: "white" };
 function Services() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const user = JSON.parse(sessionStorage.getItem("vendor"));
   const [data, setData] = useState({});
   const [storeData, setStoreData] = useState([]);
@@ -68,7 +70,7 @@ function Services() {
 
   const getServiceProductListByUserId = async () => {
     let res = await axios.post(
-      `http://localhost:8000/api/vendor/services/productlist/serviceproductbyuserid/`,
+      apiURL+`/vendor/services/productlist/serviceproductbyuserid/`,
       { userId: user._id }
     );
     if (res.status === 200) {
@@ -84,7 +86,7 @@ function Services() {
   const getSubcategoriesByCategory = async () => {
     try {
       let res = await axios.post(
-        `http://localhost:8000/api/vendor/services/subcatagory/postsubcatagoryservicesbycatagory/`,
+        apiURL+`/vendor/services/subcatagory/postsubcatagoryservicesbycatagory/`,
         {
           catagoryName: catagory,
         }
@@ -117,7 +119,7 @@ function Services() {
       const config = {
         url: "/vendor/services/productlist/addserviceproducts",
         method: "post",
-        baseURL: "http://localhost:8000/api",
+        baseURL: apiURL,
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -203,7 +205,7 @@ function Services() {
                         <td>{ProductList?.serviceProductQuantity}</td>
                         <td>
                           <img
-                            src={`http://localhost:8000/ServiceProductList/${ProductList.serviceProductImage}`}
+                            src={imgURL+`/ServiceProductList/${ProductList.serviceProductImage}`}
                             className="td-img"
                             alt="..."
                             style={{ width: "100%" }}

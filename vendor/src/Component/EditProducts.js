@@ -3,7 +3,8 @@ import axios from "axios";
 
 function EditProducts() {
   const user = JSON.parse(sessionStorage.getItem("vendor"));
-
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [category, setcategory] = useState("");
   const [subcatagory, setSubcatagory] = useState("");
   const [selectedProduct, setSelectedProduct] = useState("");
@@ -25,7 +26,7 @@ function EditProducts() {
   const getSubcategoriesByCategory = async () => {
     try {
       let res = await axios.post(
-        `http://localhost:8000/api/vendor/product/subcatagory/postsubcatagory/`,
+        apiURL+`/vendor/product/subcatagory/postsubcatagory/`,
         {
           catagoryName: category,
         }
@@ -44,7 +45,7 @@ function EditProducts() {
   const getProductBySubcatagory = async () => {
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/product/productsBySubcategory`,
+        apiURL+`/product/productsBySubcategory`,
         { SubcatagoryName: subcatagory } // Pass the subcategory ID as the request payload
       );
       if (res.status === 200) {
@@ -81,7 +82,7 @@ function EditProducts() {
       const config = {
         url: `/product/updateproduct/${productId}`,
         method: "post",
-        baseURL: "http://localhost:8000/api",
+        baseURL: apiURL,
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -221,7 +222,7 @@ function EditProducts() {
                   )}
                   {!selectedImage && (
                     <img
-                      src={`http://localhost:8000/productlist/${
+                      src={imgURL+`/productlist/${
                         productData.find(
                           (product) => product._id === selectedProduct
                         )?.productImage || ""

@@ -6,6 +6,8 @@ import ReactPaginate from "react-paginate";
 
 function Banner() {
   const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
+
   const [image, setImage] = useState();
   const [content, setcontent] = useState("");
   const [Banner, setBanner] = useState([]);
@@ -128,7 +130,7 @@ function Banner() {
                 <td>
                   <div>
                     <img
-                      src={`http://localhost:8000/banner/${data.bannerImage}`}
+                      src={imgURL+`/banner/${data.bannerImage}`}
                       className="td-img"
                       alt-loading="..."
                     />

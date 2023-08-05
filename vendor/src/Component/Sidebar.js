@@ -6,11 +6,13 @@ import { useLocation } from "react-router-dom";
 // import createNotification from "./NotificationContainer";
 
 function Sidebar() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const user = JSON.parse(sessionStorage.getItem("vendor"));
   const signout = () => {
     try {
       axios
-        .get(`http://localhost:8000/api/vendor/signout/` + user._id)
+        .get(apiURL+`/vendor/signout/` + user._id)
         .then(function (res) {
           if (res.status === 200) {
             alert("Signout Success!");

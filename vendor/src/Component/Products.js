@@ -14,6 +14,8 @@ const active = {
 };
 const inactive = { color: "black", backgroundColor: "white" };
 function Products() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const user = JSON.parse(sessionStorage.getItem("vendor"));
   const [data, setData] = useState({});
   const [storeData, setStoreData] = useState([]);
@@ -73,7 +75,7 @@ function Products() {
 
   const getProductsByUserId = async () => {
     let res = await axios.post(
-      `http://localhost:8000/api/product/productsbyuserid/`,
+      apiURL+`/product/productsbyuserid/`,
       { userId: user._id }
     );
     if (res.status === 200) {
@@ -88,7 +90,7 @@ function Products() {
   const getSubcategoriesByCategory = async () => {
     try {
       let res = await axios.post(
-        `http://localhost:8000/api/vendor/product/subcatagory/postsubcatagory/`,
+        apiURL+`/vendor/product/subcatagory/postsubcatagory/`,
         {
           catagoryName: category,
         }
@@ -121,7 +123,7 @@ function Products() {
       const config = {
         url: "/product/addproduct",
         method: "post",
-        baseURL: "http://localhost:8000/api",
+        baseURL: apiURL,
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -204,7 +206,7 @@ function Products() {
                         <td>{ele?.productQuantity}</td>
                         <td>
                           <img
-                            src={`http://localhost:8000/productlist/${ele?.productImage}`}
+                            src={imgURL+`/productlist/${ele?.productImage}`}
                             className="td-img"
                             alt="..."
                             style={{ width: "100%" }}

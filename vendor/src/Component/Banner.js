@@ -6,7 +6,8 @@ function Banner() {
   const [image, setImage] = useState();
   const [content, setcontent] = useState("");
   const [Banner, setBanner] = useState([]);
-
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   //pagination
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10; // Number of items to display per page
@@ -28,7 +29,7 @@ function Banner() {
       const config = {
         url: "/admin/addbanner",
         method: "post",
-        baseURL: "http://localhost:8000/api",
+        baseURL: apiURL,
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -49,7 +50,7 @@ function Banner() {
   }, []);
 
   const getAllBanner = async () => {
-    let res = await axios.get("http://localhost:8000/api/admin/getbanner");
+    let res = await axios.get(apiURL+"/admin/getbanner");
     if (res.status === 200) {
       console.log(res);
       setBanner(res.data?.success);
@@ -59,7 +60,7 @@ function Banner() {
   const deletBanner = async (data) => {
     try {
       axios
-        .post(`http://localhost:8000/api/admin/deletebanner/` + data._id)
+        .post(apiURL+`/admin/deletebanner/` + data._id)
         .then(function (res) {
           if (res.status === 200) {
             console.log(res.data);
@@ -137,7 +138,7 @@ function Banner() {
                   <td className="text-center">
                     <div>
                       <img
-                        src={`http://localhost:8000/banner/${data.bannerImage}`}
+                        src={imgURL+`/banner/${data.bannerImage}`}
                         className="td-img"
                         alt-loading="..."
                         style={{ width: "100%" }}

@@ -10,6 +10,8 @@ import Sidebar from "../components/layout/Sidebar";
 import { useParams, Link } from "react-router-dom";
 
 function Vendorprofile() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [data, setdata] = useState([]);
   const { id } = useParams();
 
@@ -111,7 +113,7 @@ function Vendorprofile() {
             <div className="col-md-4">
               <div style={{ display: "flex", alignItems: "center" }}>
                 <img
-                  src={`http://localhost:8000/documents/${item?.selfie}`}
+                  src={imgURL+`/documents/${item?.selfie}`}
                   className="vendorprofile"
                   alt=""
                   style={{ width: "25%", borderRadius: "100%" }}
