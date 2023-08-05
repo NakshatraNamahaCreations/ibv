@@ -119,7 +119,15 @@ class vendorProfile {
       return res.json({ vendorprofile: vendorprofile });
     }
   }
-
+async deleteVendor(req, res) {
+    let vendor = req.params.vendorid;
+    const data = await VendorModel.deleteOne({ _id: vendor });
+    if (data) {
+      return res.json({ success: "Deleted Successfully" });
+    } else {
+      return res.json({ error: "Try Again" });
+    }
+  }
   // async vendorLogin(req, res) {
   //   let { email, password } = req.body;
   //   try {

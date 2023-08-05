@@ -25,5 +25,6 @@ router.get("/signout/:id", vendorProfileController.getSignout);
 router.get("/getuser/:userid", vendorProfileController.getuser);
 router.get("/getalluser", vendorProfileController.getAllUser);
 router.post("/useredit/:id", vendorProfileController.userupdate);
+router.post("/deletevendor/:vendorid", vendorProfileController.deleteVendor);
 
 module.exports = router;
