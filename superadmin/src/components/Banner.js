@@ -5,6 +5,7 @@ import axios from "axios";
 import ReactPaginate from "react-paginate";
 
 function Banner() {
+  const apiURL = process.env.REACT_APP_API_URL;
   const [image, setImage] = useState();
   const [content, setcontent] = useState("");
   const [Banner, setBanner] = useState([]);
@@ -30,7 +31,7 @@ function Banner() {
       const config = {
         url: "/admin/addbanner",
         method: "post",
-        baseURL: "http://localhost:8000/api",
+        baseURL: apiURL,
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -51,7 +52,7 @@ function Banner() {
   }, []);
 
   const getAllBanner = async () => {
-    let res = await axios.get("http://localhost:8000/api/admin/getbanner");
+    let res = await axios.get(apiURL+"/admin/getbanner");
     if (res.status === 200) {
       console.log(res);
       setBanner(res.data?.success);
@@ -61,7 +62,7 @@ function Banner() {
   const deletBanner = async (data) => {
     try {
       axios
-        .post(`http://localhost:8000/api/admin/deletebanner/` + data._id)
+        .post(apiURL+`/admin/deletebanner/` + data._id)
         .then(function (res) {
           if (res.status === 200) {
             console.log(res.data);

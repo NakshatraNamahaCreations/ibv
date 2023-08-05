@@ -9,6 +9,10 @@ import Sidebar from "../components/layout/Sidebar";
 import ReactPaginate from "react-paginate";
 
 function Servicescategory() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
+
   const [catagoryname, setCatagoryname] = useState("");
   const [image, setImage] = useState();
   const [catagory, setCatagory] = useState([]);
@@ -34,7 +38,7 @@ function Servicescategory() {
       const config = {
         url: "/vendor/services/catagory/addservicecatagory",
         method: "post",
-        baseURL: "http://localhost:8000/api",
+        baseURL: apiURL,
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -56,7 +60,7 @@ function Servicescategory() {
 
   const getAllCatagory = async () => {
     let res = await axios.get(
-      "http://localhost:8000/api/vendor/services/catagory/getservicecatagory"
+      apiURL+"/vendor/services/catagory/getservicecatagory"
     );
     if (res.status === 200) {
       console.log("catagoryData==", res);
@@ -68,7 +72,7 @@ function Servicescategory() {
     try {
       axios
         .post(
-          `http://localhost:8000/api/vendor/services/catagory/deleteservicecatagory/` +
+          apiURL+`/vendor/services/catagory/deleteservicecatagory/` +
             data._id
         )
         .then(function (res) {
@@ -146,7 +150,7 @@ function Servicescategory() {
                   <td className="text-center">{data?.categoryname} </td>
                   <td className="text-center">
                     <img
-                      src={`http://localhost:8000/ServiceCategory/${data?.categoryimage}`}
+                      src={imgURL+`/ServiceCategory/${data?.categoryimage}`}
                       alt=""
                       width="15%"
                     />

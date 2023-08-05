@@ -18,7 +18,7 @@ function Vendorprofile() {
   }, []);
 
   const getvendor = async () => {
-    let res = await axios.get("http://localhost:8000/api/vendor/getalluser");
+    let res = await axios.get(apiURL+"/vendor/getalluser");
     if ((res.status = 200)) {
       setdata(res.data.vendorprofile);
     } else {
@@ -34,9 +34,9 @@ function Vendorprofile() {
     e.preventDefault();
     try {
       const config = {
-        url: `/approvevendor/${item._id}`,
+        url: `/vendor/approvevendor/${item._id}`,
         method: "post",
-        baseURL: "http://localhost:8000/api/vendor",
+        baseURL: apiURL,
         headers: { "content-type": "application/json" },
         data: {
           vendorstatus: "approved",
@@ -58,9 +58,9 @@ function Vendorprofile() {
     e.preventDefault();
     try {
       const config = {
-        url: `/disapprovevendor/${item._id}`,
+        url: `vendor/disapprovevendor/${item._id}`,
         method: "post",
-        baseURL: "http://localhost:8000/api/vendor",
+        baseURL: apiURL,
         headers: { "content-type": "application/json" },
         data: {
           vendorstatus: "disapproved", // Change the vendorstatus to "disapproved"

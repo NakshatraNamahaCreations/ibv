@@ -9,6 +9,8 @@ import Sidebar from "../components/layout/Sidebar";
 import ReactPaginate from "react-paginate";
 
 function ServicessubCategory() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [catagory, setCatagory] = useState([]);
   const [Subcatagory, setSubcatagory] = useState([]);
   const [catagoryName, setCatagoryName] = useState("");
@@ -37,7 +39,7 @@ function ServicessubCategory() {
       const config = {
         url: "/vendor/services/subcatagory/addsubcatagoryservices",
         method: "post",
-        baseURL: "http://localhost:8000/api",
+        baseURL: apiURL,
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -60,7 +62,7 @@ function ServicessubCategory() {
 
   const getAllCatagory = async () => {
     let res = await axios.get(
-      "http://localhost:8000/api/vendor/services/catagory/getservicecatagory"
+      apiURL+"/vendor/services/catagory/getservicecatagory"
     );
     if (res.status === 200) {
       console.log("catagory===", res);
@@ -70,7 +72,7 @@ function ServicessubCategory() {
 
   const getAllSubCatagory = async () => {
     let res = await axios.get(
-      "http://localhost:8000/api/vendor/services/subcatagory/getsubcatagoryservices"
+      apiURL+"/vendor/services/subcatagory/getsubcatagoryservices"
     );
     if (res.status === 200) {
       console.log("subcatagory===", res);
@@ -82,7 +84,7 @@ function ServicessubCategory() {
     try {
       axios
         .post(
-          `http://localhost:8000/api/vendor/services/subcatagory/deletesubcatagoryservices/` +
+          apiURL+`vendor/services/subcatagory/deletesubcatagoryservices/` +
             data._id
         )
         .then(function (res) {
@@ -162,7 +164,7 @@ function ServicessubCategory() {
                 <td className="text-center"> {data.SubcatagoryName} </td>
                 <td style={{ textAlign: "center" }}>
                   <img
-                    src={`http://localhost:8000/servicesubcatagory/${data.SubcatagoryImage}`}
+                    src={imgURL+`/servicesubcatagory/${data.SubcatagoryImage}`}
                     alt=""
                     width="15%"
                   />

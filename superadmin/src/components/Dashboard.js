@@ -3,12 +3,14 @@ import { Card } from "react-bootstrap";
 import axios from "axios";
 
 function Dashboard() {
+  const apiURL = process.env.REACT_APP_API_URL;
+
   const [data, setdata] = useState([]);
   const [catagory, setCatagory] = useState([]);
   const [Subcatagory, setSubcatagory] = useState([]);
 
   const getvendor = async () => {
-    let res = await axios.get("http://localhost:8000/api/vendor/getalluser");
+    let res = await axios.get(apiURL+"/vendor/getalluser");
     if (res.status === 200) {
       setdata(res.data.vendorprofile);
     } else {
@@ -18,7 +20,7 @@ function Dashboard() {
 
   const getAllCatagory = async () => {
     let res = await axios.get(
-      "http://localhost:8000/api/vendor/product/catagory/getcatagory"
+      apiURL+"/product/catagory/getcatagory"
     );
     if (res.status === 200) {
       console.log(res);
@@ -28,7 +30,7 @@ function Dashboard() {
 
   const getAllSubCatagory = async () => {
     let res = await axios.get(
-      "http://localhost:8000/api/vendor/product/subcatagory/getsubcatagory"
+      apiURL+"/vendor/product/subcatagory/getsubcatagory"
     );
     if (res.status === 200) {
       console.log("subcatagory===", res);

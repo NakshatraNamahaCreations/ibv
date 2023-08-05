@@ -8,6 +8,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/layout/Sidebar";
 
 function VendorManagement() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [search, setsearch] = useState("");
   const [filterdata, setfilterdata] = useState([]);
   const [data, setdata] = useState([]);
@@ -23,7 +25,7 @@ function VendorManagement() {
 
   const getvendor = async () => {
     try {
-      let res = await axios.get("http://localhost:8000/api/vendor/getalluser");
+      let res = await axios.get(apiURL+"/vendor/getalluser");
       if (res.status === 200) {
         console.log("data--", data);
         setdata(res.data?.vendorprofile);
@@ -36,9 +38,9 @@ function VendorManagement() {
     e.preventDefault();
     try {
       const config = {
-        url: `/approvevendor/${rowdata._id}`,
+        url: `/vendor/approvevendor/${rowdata._id}`,
         method: "post",
-        baseURL: "http://localhost:8000/api/vendor",
+        baseURL: apiURL,
         headers: { "content-type": "application/json" },
         data: {
           vendorstatus: "approved",
@@ -59,7 +61,7 @@ function VendorManagement() {
   const deleteVendor = async (rowdata) => {
     try {
       axios
-        .post(`http://localhost:8000/api/vendor/deletevendor/` + rowdata)
+        .post(apiURL+`/vendor/deletevendor/` + rowdata)
         .then(function (res) {
           if (res.status === 200) {
             alert(res.data.success);

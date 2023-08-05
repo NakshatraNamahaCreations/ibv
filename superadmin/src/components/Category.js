@@ -9,6 +9,7 @@ import Sidebar from "../components/layout/Sidebar";
 import ReactPaginate from "react-paginate";
 
 function Category() {
+  const apiURL = process.env.REACT_APP_API_URL;
   const [catagoryName, setCatagoryName] = useState("");
   const [image, setImage] = useState();
   const [catagory, setCatagory] = useState([]);
@@ -34,7 +35,7 @@ function Category() {
       const config = {
         url: "/vendor/product/catagory/addcatagory",
         method: "post",
-        baseURL: "http://localhost:8000/api",
+        baseURL: apiURL,
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -56,7 +57,7 @@ function Category() {
 
   const getAllCatagory = async () => {
     let res = await axios.get(
-      "http://localhost:8000/api/vendor/product/catagory/getcatagory"
+      apiURL+"/vendor/product/catagory/getcatagory"
     );
     if (res.status === 200) {
       console.log(res);
@@ -68,7 +69,7 @@ function Category() {
     try {
       axios
         .post(
-          `http://localhost:8000/api/vendor/product/catagory/deletecatagory/` +
+          apiURL+`/vendor/product/catagory/deletecatagory/` +
             data._id
         )
         .then(function (res) {

@@ -9,6 +9,8 @@ import Sidebar from "../components/layout/Sidebar";
 import ReactPaginate from "react-paginate";
 
 function SubCategory() {
+  const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [catagory, setCatagory] = useState([]);
   const [Subcatagory, setSubcatagory] = useState([]);
   const [catagoryName, setCatagoryName] = useState("");
@@ -38,7 +40,7 @@ function SubCategory() {
       const config = {
         url: "/vendor/product/subcatagory/addsubcatagory",
         method: "post",
-        baseURL: "http://localhost:8000/api",
+        baseURL: apiURL,
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -61,7 +63,7 @@ function SubCategory() {
 
   const getAllCatagory = async () => {
     let res = await axios.get(
-      "http://localhost:8000/api/vendor/product/catagory/getcatagory"
+      apiURL+"/vendor/product/catagory/getcatagory"
     );
     if (res.status === 200) {
       console.log("catagory===", res);
@@ -71,7 +73,7 @@ function SubCategory() {
 
   const getAllSubCatagory = async () => {
     let res = await axios.get(
-      "http://localhost:8000/api/vendor/product/subcatagory/getsubcatagory"
+      apiURL+"/vendor/product/subcatagory/getsubcatagory"
     );
     if (res.status === 200) {
       console.log("subcatagory===", res);
@@ -83,7 +85,7 @@ function SubCategory() {
     try {
       axios
         .post(
-          `http://localhost:8000/api/vendor/product/subcatagory/deletesubcatagory/` +
+          apiURL+`/vendor/product/subcatagory/deletesubcatagory/` +
             data._id
         )
         .then(function (res) {
@@ -164,7 +166,7 @@ function SubCategory() {
                   <td className="text-center"> {data.SubcatagoryName} </td>
                   <td style={{ textAlign: "center" }}>
                     <img
-                      src={`http://localhost:8000/subcatagory/${data.SubcatagoryImage}`}
+                      src={imgURL+`/subcatagory/${data.SubcatagoryImage}`}
                       alt=""
                       width="31%"
                     />
