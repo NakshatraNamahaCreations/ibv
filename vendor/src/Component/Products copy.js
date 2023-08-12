@@ -13,6 +13,7 @@ const active = {
 };
 const inactive = { color: "black", backgroundColor: "white" };
 function Products() {
+  
   const user = JSON.parse(sessionStorage.getItem("vendor"));
   const [data, setData] = useState({});
   const [storeData, setStoreData] = useState([]);

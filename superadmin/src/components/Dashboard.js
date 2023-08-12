@@ -20,7 +20,7 @@ function Dashboard() {
 
   const getAllCatagory = async () => {
     let res = await axios.get(
-      apiURL+"/product/catagory/getcatagory"
+      apiURL+"/vendor/product/catagory/getcatagory"
     );
     if (res.status === 200) {
       console.log(res);
@@ -104,7 +104,7 @@ function Dashboard() {
               <div className="count_content cm-font-awsm">
                 <p>Vendor</p>{" "}
                 <h3 className="count_content-head">
-                  <span class="counter">{data.length} </span>
+                  <span class="counter">{data?.length} </span>
                 </h3>
               </div>
               <a
@@ -148,7 +148,7 @@ function Dashboard() {
               <div className="count_content cm-font-awsm">
                 <p>Catagory</p>{" "}
                 <h3 className="count_content-head">
-                  <span class="counter">{catagory.length} </span>
+                  <span class="counter">{catagory?.length} </span>
                 </h3>
               </div>
               <a
@@ -170,7 +170,7 @@ function Dashboard() {
               <div className="count_content cm-font-awsm">
                 <p>Subcategory</p>{" "}
                 <h3 className="count_content-head">
-                  <span class="counter">{Subcatagory.length} </span>
+                  <span class="counter">{Subcatagory?.length} </span>
                 </h3>
               </div>
               <a

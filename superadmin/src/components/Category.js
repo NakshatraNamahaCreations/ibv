@@ -10,6 +10,8 @@ import ReactPaginate from "react-paginate";
 
 function Category() {
   const apiURL = process.env.REACT_APP_API_URL;
+  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
+
   const [catagoryName, setCatagoryName] = useState("");
   const [image, setImage] = useState();
   const [catagory, setCatagory] = useState([]);
@@ -20,6 +22,7 @@ function Category() {
   const pageCount = Math.ceil(catagory.length / itemsPerPage);
   const offset = currentPage * itemsPerPage;
   const currentPageData = catagory.slice(offset, offset + itemsPerPage);
+  const formdata = new FormData();
 
   // Handle page change
   const handlePageChange = ({ selected }) => {
@@ -27,8 +30,8 @@ function Category() {
   };
 
   const AddCatagory = async (e) => {
-    const formdata = new FormData();
     e.preventDefault();
+    
     formdata.append("catagoryName", catagoryName);
     formdata.append("catagoryImage", image);
     try {

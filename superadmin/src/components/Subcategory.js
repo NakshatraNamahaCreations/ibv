@@ -20,9 +20,9 @@ function SubCategory() {
   //pagination
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10; // Number of items to display per page
-  const pageCount = Math.ceil(Subcatagory.length / itemsPerPage);
+  const pageCount = Math.ceil(Subcatagory?.length / itemsPerPage);
   const offset = currentPage * itemsPerPage;
-  const currentPageData = Subcatagory.slice(offset, offset + itemsPerPage);
+  const currentPageData = Subcatagory?.slice(offset, offset + itemsPerPage);
 
   // Handle page change
   const handlePageChange = ({ selected }) => {
@@ -71,13 +71,14 @@ function SubCategory() {
     }
   };
 
+  console.log(Subcatagory)
   const getAllSubCatagory = async () => {
     let res = await axios.get(
       apiURL+"/vendor/product/subcatagory/getsubcatagory"
     );
     if (res.status === 200) {
       console.log("subcatagory===", res);
-      setSubcatagory(res.data?.subcatagory);
+      setSubcatagory(res.data?.subcategory);
     }
   };
 
@@ -159,7 +160,7 @@ function SubCategory() {
               </tr>
             </thead>
             <tbody>
-              {currentPageData?.map((data) => (
+              {Subcatagory?.map((data) => (
                 <tr className="user-tbale-body">
                   <td className="text-center">{i++} </td>
                   <td className="text-center">{data.catagoryName}</td>
