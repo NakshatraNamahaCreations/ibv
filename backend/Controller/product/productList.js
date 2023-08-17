@@ -14,6 +14,8 @@ class ProductList {
       productBrand,
       productSize,
       productDiscount,
+      productvalue,
+      productRangeprice,
       // productRange,
     } = req.body;
     let file = req.file?.filename;
@@ -34,6 +36,8 @@ class ProductList {
         productSize,
         productDiscount,
         // productRange,
+        productvalue,
+        productRangeprice,
       });
       if (!file) {
         return res.status(500).json({

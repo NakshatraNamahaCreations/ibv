@@ -45,6 +45,12 @@ const ProductList = new Schema({
   productRange: {
     type: Array,
   },
+  productvalue: {
+    type: String,
+  },
+  productRangeprice: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),
