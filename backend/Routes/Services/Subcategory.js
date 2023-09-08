@@ -39,5 +39,9 @@ router.post(
   "/deletesubcatagoryservices/:subcatagoryid",
   SubCatagoryserviceController.deleteSubCatagory
 );
-
+router.post(
+  "/updateservicesubcategory/:id",
+  upload.single("SubcatagoryImage"),
+  SubCatagoryserviceController.updateSubcategory
+);
 module.exports = router;

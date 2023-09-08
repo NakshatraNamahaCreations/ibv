@@ -57,10 +57,19 @@ const Vendor = new Schema({
   businesstype: {
     type: String,
   },
-  paymentStatus:{
+  adharfrontendimg: {
+    type: String,
+  },
+  adharbackendimg: {
+    type: String,
+  },
+  panimg: {
     type: String,
   },
   selfie: {
+    type: String,
+  },
+  vendorstatus: {
     type: String,
   },
   customNumber: {
@@ -102,14 +111,8 @@ const Vendor = new Schema({
   myreferalCode: {
     type: String,
   },
-  adharfrontendimg:{
-    type:String
-  },
-  adharbackendimg:{
-    type:String
-  },
-  panimg:{
-    type:String
+  ProductLimits: {
+    type: Number,
   },
   createAt: {
     type: Date,

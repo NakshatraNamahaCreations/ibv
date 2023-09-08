@@ -8,16 +8,23 @@ const ProductList = new Schema({
     ref: "catagories",
   },
   userId: {
-    type: ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "vendorprofile", // Reference to Vendor model
   },
   subcatagoryId: {
     type: ObjectId,
     ref: "subcatagories",
   },
+  SubcatagoryName: {
+    type: String,
+  },
+  catagoryName: {
+    type: String,
+  },
   productName: {
     type: String,
   },
-  ProductPrice: {
+  productPrice: {
     type: Number,
   },
   productImage: {
@@ -31,9 +38,8 @@ const ProductList = new Schema({
   },
   productStatus: {
     type: String,
-    default: "active",
   },
-  ProductBrand: {
+  productBrand: {
     type: String,
   },
   productSize: {
@@ -43,13 +49,7 @@ const ProductList = new Schema({
     type: String,
   },
   productRange: {
-    type: Array,
-  },
-  productvalue: {
-    type: String,
-  },
-  productRangeprice: {
-    type: String,
+    type: Number,
   },
   createdAt: {
     type: Date,

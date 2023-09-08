@@ -19,10 +19,13 @@ class SubCatagory {
       }
       newSubCatagory.save().then((data) => {
         console.log(data);
-        return res.status(200).json({ success: "success" });
+        return res.status(200).json({ message: `Subcategory Added` });
       });
     } catch (error) {
       console.log(error);
+      return res
+        .status(403)
+        .json({ Error: `Unable to add the Subcatagory! Try again...` });
     }
   }
 
@@ -33,16 +36,17 @@ class SubCatagory {
     }
   }
 
+  // this api for fetching subcategory from  category
   async postsubcategory(req, res) {
-    let { categoryname } = req.body;
+    let { catagoryName } = req.body;
     let subcatagoryservices = await ServicesSubcatagoryModel.find({
-      categoryname,
+      catagoryName,
     }).sort({
       _id: -1,
     });
     console.log(subcatagoryservices);
     if (subcatagoryservices) {
-      return res.json({ subcatagoryservices: subcatagoryservices });
+      return res.json({ success: subcatagoryservices });
     }
   }
 
@@ -95,6 +99,44 @@ class SubCatagory {
       return res.json({ success: "Deleted Successfully" });
     } else {
       return res.json({ error: "not able to complete" });
+    }
+  }
+
+  async updateSubcategory(req, res) {
+    try {
+      const SubcategoryId = req.params.id;
+      const { catagoryName, SubcatagoryName } = req.body;
+      const file = req.file?.filename;
+
+      const findSubCategory = await ServicesSubcatagoryModel.findOne({
+        _id: SubcategoryId,
+      });
+      if (!findSubCategory) {
+        return res.json({ error: "No such record found" });
+      }
+      //
+      findSubCategory.catagoryName =
+        catagoryName || findSubCategory.catagoryName;
+      findSubCategory.SubcatagoryName =
+        SubcatagoryName || findSubCategory.SubcatagoryName;
+      if (file) {
+        findSubCategory.SubcatagoryImage = file;
+      }
+
+      const updateSubcategory = await ServicesSubcatagoryModel.findOneAndUpdate(
+        { _id: SubcategoryId },
+        findSubCategory,
+        { new: true } // Return the updated document
+      );
+      return res.json({
+        message: "Updated successfully",
+        date: updateSubcategory,
+      });
+    } catch (error) {
+      console.log("error", error);
+      return res
+        .status(500)
+        .json({ error: "Unable to update the Subcategory" });
     }
   }
 }

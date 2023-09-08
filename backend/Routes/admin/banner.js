@@ -16,7 +16,7 @@ const upload = multer({ storage: storage });
 
 router.post(
   "/addbanner",
-  upload.single("banner"),
+  upload.single("bannerImage"),
   adminbannerontroller.postbanner
 );
 router.get("/getbanner", adminbannerontroller.getbanner);

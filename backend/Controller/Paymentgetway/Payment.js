@@ -15,7 +15,7 @@ class Paymentgetway {
           merchantId: "INFINITYBVONLINE",
           merchantTransactionId: transactionId,
           merchantUserId: "asfnjk212",
-          amount: 100,
+          amount: 5109600,
           redirectUrl: "",
           redirectMode: "POST",
           callbackUrl: `http://192.168.1.67:8000/api/payment/status/INFINITYBVONLINE/${transactionId}`,
@@ -122,6 +122,18 @@ class Paymentgetway {
     } catch (err) {
       console.log(err);
       return res.status(500).json({ error: "Failed to fetch user status" });
+    }
+  }
+  async getAllPayment(req, res) {
+    try {
+      const payment = await Paymentgetwaymodel.find({});
+      if (payment) {
+        res.status(200).json({ success: payment });
+      } else {
+        res.status(404).json({ error: "something went wrong" });
+      }
+    } catch (error) {
+      console.log("error:", error);
     }
   }
 }

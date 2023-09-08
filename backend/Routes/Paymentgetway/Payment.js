@@ -13,5 +13,6 @@ router.get(
   "/paymentstatus/:userId",
   paymentgetwaycontroller.getpaymentstatusByUserId
 );
+router.get("/getpayments", paymentgetwaycontroller.getAllPayment);
 
 module.exports = router;

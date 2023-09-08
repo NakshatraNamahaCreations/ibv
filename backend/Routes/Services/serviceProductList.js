@@ -20,14 +20,6 @@ router.post(
   ServiceProductListController.AddProduct
 );
 
-// router.get(
-//   "/getservicecatagory",
-//   catagoryserviceController.getAllcatagoryservices
-// );
-// router.post(
-//   "/deleteservicecatagory/:catagoryid",
-//   catagoryserviceController.deleteserviceCatagory
-// );
 router.post(
   "/serviceproductbyuserid",
   ServiceProductListController.getServiceProductByUserId
@@ -36,10 +28,28 @@ router.post(
   "/serviceproductbysubcatagory",
   ServiceProductListController.ProductsBySubcategory
 );
+
 router.post(
   "/updateservice/:id",
   upload.single("serviceProductImage"),
   ServiceProductListController.updateService
 );
+router.get("/getserviceswithusersdetails");
+ServiceProductListController.getServiceWithUserDetails;
 
+router.get("/getservicelist");
+ServiceProductListController.getProductservicelist;
+
+router.put(
+  "/serviceapprove/:serviceId",
+  ServiceProductListController.serviceApprove
+);
+router.put(
+  "/servicedisapprove/:serviceId",
+  ServiceProductListController.serviceDisapprove
+);
+router.post(
+  "/deleteservice/:serviceId",
+  ServiceProductListController.deleteService
+);
 module.exports = router;

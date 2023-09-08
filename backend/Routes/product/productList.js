@@ -21,7 +21,26 @@ router.post(
 );
 router.get("/getcatagory", ProductListController.getcatagory);
 router.get("/getproduct", ProductListController.getProduct);
+router.get(
+  "/getproductswithusersdetails",
+  ProductListController.getProductsWithUserDetails
+);
 router.post("/productsbyuserid", ProductListController.getProductByUserId);
 router.post("/productrange/:id", ProductListController.productrange);
+router.put("/productapprove/:productId", ProductListController.productApprove);
+router.put(
+  "/productdisapprove/:productId",
+  ProductListController.productDisapprove
+);
+router.post(
+  "/updateproduct/:id",
+  upload.single("productImage"),
+  ProductListController.updateProduct
+);
+router.post(
+  "/getproductsbysubcategory",
+  ProductListController.ProductsBySubcategory
+);
 
+router.post("/deleteproduct/:productId", ProductListController.deleteProduct);
 module.exports = router;

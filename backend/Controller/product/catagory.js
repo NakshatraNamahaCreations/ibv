@@ -18,7 +18,7 @@ class Catagory {
       }
       newCatagory.save().then((data) => {
         console.log(data);
-        return res.status(200).json({ success: "success" });
+        return res.status(200).json({ success: "Category Added Successfully" });
       });
     } catch (error) {
       console.log(error);
@@ -60,6 +60,39 @@ class Catagory {
       return res.json({ success: "Deleted Successfully" });
     } else {
       return res.json({ error: "not able to complete" });
+    }
+  }
+
+  async updateCategory(req, res) {
+    try {
+      const categoryId = req.params.id;
+      const { catagoryName } = req.body;
+      const file = req.file?.filename;
+
+      const findCategory = await catagoryModal.findOne({
+        _id: categoryId,
+      });
+      if (!findCategory) {
+        return res.json({ error: "No such record found" });
+      }
+      //
+      findCategory.catagoryName = catagoryName || findCategory.catagoryName;
+      if (file) {
+        findCategory.catagoryImage = file;
+      }
+
+      const updateCategory = await catagoryModal.findOneAndUpdate(
+        { _id: categoryId },
+        findCategory,
+        { new: true } // Return the updated document
+      );
+      return res.json({
+        message: "Updated successfully",
+        date: updateCategory,
+      });
+    } catch (error) {
+      console.log("error", error);
+      return res.status(500).json({ error: "Unable to update the Category" });
     }
   }
 }

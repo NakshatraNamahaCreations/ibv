@@ -24,6 +24,11 @@ router.get(
   "/getSubcategoriesByCategory/:categoryId",
   SubCatagoryController.getSubcategoriesByCategory
 );
+router.put(
+  "/updateproductsubcategory/:id",
+  upload.single("SubcatagoryImage"),
+  SubCatagoryController.updateSubcategory
+);
 router.get("/getallsubcatagory", SubCatagoryController.getAllSubcatagory);
 router.post("/postsubcatagory", SubCatagoryController.postsubcategory);
 router.post(

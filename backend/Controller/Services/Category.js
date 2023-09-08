@@ -13,12 +13,18 @@ class Catagory {
       });
       let newData = newCatagory.save();
       if (newData) {
-        return res.status(201).send({ message: `New Category` });
+        return res
+          .status(200)
+          .send({ message: `Category Added`, success: "success" });
       } else {
         throw Error("Not Able To Save Data");
       }
     } catch (error) {
       console.log(error);
+      return res
+        .status(403)
+        .json({ Error: `Unable to add the catagory! Try again...` });
+      // .json({ Error: `Error in Saving Catagories ${error}` });
     }
   }
 
@@ -55,6 +61,39 @@ class Catagory {
       return res.json({ success: "Deleted Successfully" });
     } else {
       return res.json({ error: "not able to complete" });
+    }
+  }
+
+  async updateCategory(req, res) {
+    try {
+      const categoryId = req.params.id;
+      const { categoryname } = req.body;
+      const file = req.file?.filename;
+
+      const findCategory = await ServiceCategoryModel.findOne({
+        _id: categoryId,
+      });
+      if (!findCategory) {
+        return res.json({ error: "No such record found" });
+      }
+      //
+      findCategory.categoryname = categoryname || findCategory.categoryname;
+      if (file) {
+        findCategory.categoryimage = file;
+      }
+
+      const updateCategory = await ServiceCategoryModel.findOneAndUpdate(
+        { _id: categoryId },
+        findCategory,
+        { new: true } // Return the updated document
+      );
+      return res.json({
+        message: "Updated successfully",
+        date: updateCategory,
+      });
+    } catch (error) {
+      console.log("error", error);
+      return res.status(500).json({ error: "Unable to update the Category" });
     }
   }
 }

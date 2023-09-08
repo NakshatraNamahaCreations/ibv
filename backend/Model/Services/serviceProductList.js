@@ -3,8 +3,9 @@ const Schema = mongoose.Schema;
 
 const ServiceProductList = new Schema({
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
+    ref: "vendorprofile",
   },
   serviceSubcatagoryName: {
     type: String,
@@ -27,9 +28,11 @@ const ServiceProductList = new Schema({
   serviceProductQuantity: {
     type: String,
   },
+  serviceProductRange: {
+    type: Number,
+  },
   serviceProductStatus: {
     type: String,
-    default: "active",
   },
   serviceProductBrand: {
     type: String,

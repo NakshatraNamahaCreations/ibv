@@ -22,5 +22,10 @@ router.post(
 router.get("/getcatagory", catagoryController.getAllcatagory);
 router.post("/deletecatagory/:catagoryid", catagoryController.deleteCatagory);
 router.post("/postprocat", catagoryController.postcategory);
+router.put(
+  "/updateproductcategory/:id",
+  upload.single("catagoryImage"),
+  catagoryController.updateCategory
+);
 
 module.exports = router;

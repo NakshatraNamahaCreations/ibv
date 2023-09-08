@@ -19,7 +19,9 @@ class SubCatagory {
       }
       newSubCatagory.save().then((data) => {
         console.log(data);
-        return res.status(200).json({ success: "success" });
+        return res
+          .status(200)
+          .json({ success: "Subcategory Added Successfully" });
       });
     } catch (error) {
       console.log(error);
@@ -33,6 +35,7 @@ class SubCatagory {
     }
   }
 
+  // this api for fetching subcategory from  category
   async postsubcategory(req, res) {
     let { catagoryName } = req.body;
     let subcategory = await SubcatagoryModel.find({ catagoryName }).sort({
@@ -40,7 +43,7 @@ class SubCatagory {
     });
     console.log(subcategory);
     if (subcategory) {
-      return res.json({ subcategory: subcategory });
+      return res.json({ success: subcategory });
     }
   }
 
@@ -91,6 +94,44 @@ class SubCatagory {
       return res.json({ success: "Deleted Successfully" });
     } else {
       return res.json({ error: "not able to complete" });
+    }
+  }
+
+  async updateSubcategory(req, res) {
+    try {
+      const SubcategoryId = req.params.id;
+      const { catagoryName, SubcatagoryName } = req.body;
+      const file = req.file?.filename;
+
+      const findSubCategory = await SubcatagoryModel.findOne({
+        _id: SubcategoryId,
+      });
+      if (!findSubCategory) {
+        return res.json({ error: "No such record found" });
+      }
+      //
+      findSubCategory.catagoryName =
+        catagoryName || findSubCategory.catagoryName;
+      findSubCategory.SubcatagoryName =
+        SubcatagoryName || findSubCategory.SubcatagoryName;
+      if (file) {
+        findSubCategory.SubcatagoryImage = file;
+      }
+
+      const updateSubcategory = await SubcatagoryModel.findOneAndUpdate(
+        { _id: SubcategoryId },
+        findSubCategory,
+        { new: true } // Return the updated document
+      );
+      return res.json({
+        message: "Updated successfully",
+        date: updateSubcategory,
+      });
+    } catch (error) {
+      console.log("error", error);
+      return res
+        .status(500)
+        .json({ error: "Unable to update the Subcategory" });
     }
   }
 }

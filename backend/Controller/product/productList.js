@@ -9,14 +9,12 @@ class ProductList {
       productName,
       productPrice,
       productDescription,
-      productQuantity,
-      productStatus,
+      // productQuantity,
+      // productStatus,
       productBrand,
-      productSize,
-      productDiscount,
-      productvalue,
-      productRangeprice,
-      // productRange,
+      // productSize,
+      // productDiscount,
+      productRange,
     } = req.body;
     let file = req.file?.filename;
     try {
@@ -30,14 +28,12 @@ class ProductList {
         productName,
         productPrice,
         productDescription,
-        productQuantity,
-        productStatus,
+        // productQuantity,
+        // productStatus,
         productBrand,
-        productSize,
-        productDiscount,
-        // productRange,
-        productvalue,
-        productRangeprice,
+        // productSize,
+        // productDiscount,
+        productRange,
       });
       if (!file) {
         return res.status(500).json({
@@ -147,6 +143,77 @@ class ProductList {
     }
   }
 
+  // async getProductsWithUserDetails(req, res) {
+  //   try {
+  //     var data = await ProductListModel.aggregate([
+  //       {
+  //         $lookup: {
+  //           from: "vendorprofiles",
+  //           localField: "userId",
+  //           foreignField: "_id",
+  //           as: "userDetails",
+  //         },
+  //       },
+  //     ]);
+  //     return res.status(200).json({ getAllProductsWithUserDetails: data });
+  //   } catch (error) {
+  //     console.error("Error fetching product details:", error);
+  //     return res
+  //       .status(500)
+  //       .json({ error: "An error occurred while fetching data." });
+  //   }
+  // }
+
+  async getProductsWithUserDetails(req, res) {
+    try {
+      const productsWithUsers = await ProductListModel.find().populate(
+        "userId",
+        "-password"
+      ); // "-password" to exclude the password field
+
+      return res.status(200).json({ productsWithUsers });
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while fetching data." });
+    }
+  }
+
+  async productApprove(req, res) {
+    try {
+      let productId = req.params.productId;
+      const updatedProduct = await ProductListModel.findOneAndUpdate(
+        { _id: productId },
+        { productStatus: "approved" },
+        { new: true }
+      );
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error("Error approving product:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while approving the product." });
+    }
+  }
+
+  async productDisapprove(req, res) {
+    try {
+      let productId = req.params.productId;
+      const updatedProduct = await ProductListModel.findOneAndUpdate(
+        { _id: productId },
+        { productStatus: "disapproved" },
+        { new: true }
+      );
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error("Error disapproving product:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while disapproving the product." });
+    }
+  }
+
   async updateProduct(req, res) {
     try {
       const productId = req.params.id;
@@ -161,6 +228,7 @@ class ProductList {
         productStatus,
         productBrand,
         productSize,
+        productRange,
       } = req.body;
       const file = req.file?.filename;
 
@@ -175,6 +243,7 @@ class ProductList {
       if (productDescription)
         existingProduct.productDescription = productDescription;
       if (productQuantity) existingProduct.productQuantity = productQuantity;
+      if (productRange) existingProduct.productRange = productRange;
       if (productStatus) existingProduct.productStatus = productStatus;
       if (productBrand) existingProduct.productBrand = productBrand;
       if (productSize) existingProduct.productSize = productSize;
@@ -186,6 +255,21 @@ class ProductList {
     } catch (error) {
       console.log("error", error);
       return res.status(500).json({ error: "Unable to update the product" });
+    }
+  }
+
+  async deleteProduct(req, res) {
+    let product = req.params.productId;
+    try {
+      const data = await ProductListModel.deleteOne({ _id: product });
+      if (data) {
+        return res.status(200).json({ Success: "Deleted Successfully" });
+      } else {
+        return res.status(200).json({ Error: "Can't able to do" });
+      }
+    } catch (error) {
+      console.log("error", error);
+      return res.status(500).json({ Error: "Something went wrong" });
     }
   }
 }

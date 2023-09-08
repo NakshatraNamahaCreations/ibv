@@ -8,13 +8,10 @@ class ServiceProductList {
       serviceCatagoryName,
       serviceProductName,
       serviceProductPrice,
-      serviceProductImage,
+      serviceProductRange,
       serviceProductDescription,
-      serviceProductQuantity,
-      serviceProductStatus,
       serviceProductBrand,
       serviceProductSize,
-      serviceProductDiscount,
     } = req.body;
     let file = req.file?.filename;
     try {
@@ -24,13 +21,11 @@ class ServiceProductList {
         serviceCatagoryName,
         serviceProductName,
         serviceProductPrice,
-        serviceProductImage: file,
+        serviceProductRange,
         serviceProductDescription,
-        serviceProductQuantity,
-        serviceProductStatus,
         serviceProductBrand,
         serviceProductSize,
-        serviceProductDiscount,
+        serviceProductImage: file,
       });
       if (!file) {
         return res.status(500).json({
@@ -66,14 +61,41 @@ class ServiceProductList {
     }
   }
 
+  async getServiceWithUserDetails(req, res) {
+    try {
+      const serviceWithUsers = await ServiceProductListModal.find().populate(
+        "userId",
+        "-password"
+      ); // "-password" to exclude the password field
+
+      return res.status(200).json({ serviceWithUsers });
+    } catch (error) {
+      console.error("Error fetching service details:", error);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while fetching data." });
+    }
+  }
+
+  async getProductservicelist(req, res) {
+    try {
+      let service = await ServiceProductListModal.find({});
+      if (service) {
+        console.log("product", service);
+        return res.json({ service: service });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   async ProductsBySubcategory(req, res) {
     try {
       let { serviceSubcatagoryName } = req.body;
       const products = await ServiceProductListModal.find({
         serviceSubcatagoryName,
-      });
-      // .sort({ _id });
-      console.log("product", products);
+      }).sort({ _id: -1 });
+      console.log("Service", products);
       if (products.length > 0) {
         return res.json({ product: products });
       } else {
@@ -82,6 +104,40 @@ class ServiceProductList {
     } catch (err) {
       console.log(err);
       return res.status(500).json({ error: "Failed to fetch subcategories" });
+    }
+  }
+
+  async serviceApprove(req, res) {
+    try {
+      let productId = req.params.productId;
+      const updatedProduct = await ServiceProductListModal.findOneAndUpdate(
+        { _id: productId },
+        { productStatus: "approved" },
+        { new: true }
+      );
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error("Error approving product:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while approving the product." });
+    }
+  }
+
+  async serviceDisapprove(req, res) {
+    try {
+      let productId = req.params.productId;
+      const updatedProduct = await ServiceProductListModal.findOneAndUpdate(
+        { _id: productId },
+        { productStatus: "disapproved" },
+        { new: true }
+      );
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error("Error disapproving product:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while disapproving the product." });
     }
   }
 
@@ -94,12 +150,9 @@ class ServiceProductList {
         serviceSubcatagoryName,
         serviceProductName,
         serviceProductPrice,
-        serviceProductImage,
         serviceProductDescription,
-        serviceProductQuantity,
-        serviceProductStatus,
         serviceProductBrand,
-        serviceProductSize,
+        serviceProductRange,
       } = req.body;
       const file = req.file?.filename;
       const existingService = await ServiceProductListModal.findById(productId);
@@ -113,22 +166,36 @@ class ServiceProductList {
         existingService.serviceProductName = serviceProductName;
       if (serviceProductPrice)
         existingService.serviceProductPrice = serviceProductPrice;
+
       if (serviceProductDescription)
         existingService.serviceProductDescription = serviceProductDescription;
-      if (serviceProductQuantity)
-        existingService.serviceProductQuantity = serviceProductQuantity;
-      if (serviceProductStatus)
-        existingService.serviceProductStatus = serviceProductStatus;
+
+      if (serviceProductRange)
+        existingService.serviceProductRange = serviceProductRange;
       if (serviceProductBrand)
         existingService.serviceProductBrand = serviceProductBrand;
-      if (serviceProductSize)
-        existingService.serviceProductSize = serviceProductSize;
+
       if (file) existingService.serviceProductImage = file;
       const updatedService = await existingService.save();
       return res.json({ success: "Updated", product: updatedService });
     } catch (error) {
       console.log("error", error);
       return res.status(500).json({ error: "Unable to update the product" });
+    }
+  }
+
+  async deleteService(req, res) {
+    let service = req.params.serviceId;
+    try {
+      const data = await ServiceProductListModal.deleteOne({ _id: service });
+      if (data) {
+        return res.status(200).json({ Success: "Deleted Successfully" });
+      } else {
+        return res.status(200).json({ Error: "Can't able to do" });
+      }
+    } catch (error) {
+      console.log("error", error);
+      return res.status(500).json({ Error: "Something went wrong" });
     }
   }
 }

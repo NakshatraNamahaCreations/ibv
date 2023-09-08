@@ -28,5 +28,10 @@ router.post(
   catagoryserviceController.deleteserviceCatagory
 );
 router.post("/postsercat", catagoryserviceController.postcategory);
+router.put(
+  "/updateservicecategory/:id",
+  upload.single("categoryimage"),
+  catagoryserviceController.updateCategory
+);
 
 module.exports = router;

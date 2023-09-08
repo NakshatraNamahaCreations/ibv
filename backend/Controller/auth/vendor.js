@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs");
 class vendorProfile {
   async createAccount(req, res) {
     try {
-      const {
+      let {
         firstname,
         lastname,
         email,
@@ -23,63 +23,56 @@ class vendorProfile {
         category,
         checkbox,
         websiteaddress,
-        panImage,
+        panimg,
         panNumber,
         selfie,
         gst,
-        referralCode,
-        accountName,
-        accountNumber,
+        referalCode,
+        accountname,
+        accountnumber,
         latitude,
         longitude,
         categoryname,
-        aadhaarNumber,
-        // adharfrontendimg,
-        // adharbackendimg,
-        // panimg,
-        // Add this if applicable
+        // referalCode,
       } = req.body;
 
-      const file = req.files[0]?.filename;
-      const file1 = req.files[1]?.filename;
-      const file2 = req.files[2]?.filename;
-      // const file3 = req.files[3]?.filename;
-
-      const vendorCount = await VendorModel.findOneAndUpdate(
+      let vendorCount = await VendorModel.findOneAndUpdate(
         {},
         { $inc: { count: 1 } },
         { new: true }
       );
 
       if (!vendorCount) {
-        const newVendorCount = new VendorModel({ count: 1 });
-        await newVendorCount.save();
+        vendorCount = new VendorModel({ count: 1 });
+        await vendorCount.save();
       }
 
+      // Check if vendorCount is still undefined
       if (!vendorCount) {
+        console.error("Error retrieving count from database");
         return res.status(500).json({ error: "An error occurred" });
       }
 
+      // Generate the custom number
       const customNumber = `IM2023${vendorCount.count}`;
-      const myReferalCode = `REFIM2023${vendorCount.count}`;
+      const myreferalCode = `REFIM2023${vendorCount.count}`;
 
-      const hashedPassword = bcrypt.hashSync(password, 10);
-
-      const existingEmail = await VendorModel.findOne({ email });
-      if (existingEmail) {
-        return res.status(400).json({ error: "Email already exists" });
+      password = bcrypt.hashSync(password, 10);
+      // firstname = toTitleCase(firstname);
+      const Email = await VendorModel.findOne({ email: email });
+      if (Email) {
+        return res.status(500).json({ error: "Email already exits" });
       }
 
-      const existingPhone = await VendorModel.findOne({ phoneNumber });
-      if (existingPhone) {
-        return res.status(400).json({ error: "Mobile number already exists" });
+      const phone = await VendorModel.findOne({ phoneNumber: phoneNumber });
+      if (phone) {
+        return res.status(500).json({ error: "mobile number already exits" });
       }
-
       const newVendor = new VendorModel({
         firstname,
         lastname,
         email,
-        password: hashedPassword,
+        password,
         phoneNumber,
         alternativeNumber,
         dob,
@@ -91,34 +84,28 @@ class vendorProfile {
         businesstype,
         category,
         customNumber,
-        referralCode,
-        myReferalCode,
+        referalCode,
+        myreferalCode,
         websiteaddress,
         checkbox,
-        panImage,
+        panimg,
         panNumber,
         selfie,
         gst,
-        accountName,
-        accountNumber,
+        accountname,
+        accountnumber,
         latitude,
         longitude,
         categoryname,
-        aadhaarNumber,
-        adharfrontendimg: file,
-        adharbackendimg: file1,
-        panimg: file2,
-        // selfieImage: file3,
       });
-
-      const savedVendor = await newVendor.save();
-      console.log(savedVendor);
-      return res
-        .status(201)
-        .json({ success: "Account created. Please login", user: savedVendor });
+      newVendor.save().then((data) => {
+        console.log(data);
+        return res
+          .status(200)
+          .json({ Success: "Account created. Please login", user: data });
+      });
     } catch (error) {
       console.error("Error creating account:", error);
-      return res.status(500).json({ error: "An error occurred" });
     }
   }
 
@@ -189,6 +176,27 @@ class vendorProfile {
     }
   }
 
+  async vendorLoginWithMobile(req, res) {
+    const { phoneNumber } = req.body;
+    try {
+      if (!phoneNumber) {
+        return res.status(400).json({ error: "Please enter mobile number" });
+      }
+
+      const user = await VendorModel.findOne({ phoneNumber });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ error: "Mobile number not found or invalid mobile number" });
+      }
+      await VendorModel.findOneAndUpdate({ phoneNumber }, { status: "Online" });
+      return res.json({ success: "Login successful", user });
+    } catch (error) {
+      console.error("Something went wrong", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
   async uploaddocument(req, res) {
     try {
       let id = req.params.id;
@@ -213,30 +221,6 @@ class vendorProfile {
       }
     } catch (error) {
       console.log(error);
-    }
-  }
-
-  async getdatawithpayment(req, res) {
-    try {
-      let Allvendor = await VendorModel.aggregate([
-        {
-          $lookup: {
-            from: "paymentgetwaymodels",
-            localField: "_id",
-            foreignField: "userId",
-            as: "paymentgetway",
-          },
-        },
-      ]);
-      if (Allvendor) {
-        console.log(Allvendor);
-        return res.send({ Allvendor: Allvendor });
-      } else {
-        return res.status(404).json({ error: "subcatagory didn't exist" });
-      }
-    } catch (error) {
-      console.log(error);
-      return res.status(404).json({ error: "Something went wrong" });
     }
   }
 
@@ -278,6 +262,45 @@ class vendorProfile {
     }
   }
 
+  async approveupdate(req, res) {
+    try {
+      const vendorId = req.params.id;
+      const {
+        firstname,
+        lastname,
+        email,
+        dob,
+        phoneNumber,
+        businessName,
+        businesstype,
+        category,
+      } = req.body;
+      const findVendor = await VendorModel.findOne({
+        _id: vendorId,
+      });
+      if (!findVendor) {
+        return res.json({ error: "No such record found" });
+      }
+
+      findVendor.firstname = firstname || findVendor.firstname;
+      findVendor.lastname = lastname || findVendor.lastname;
+      findVendor.email = email || findVendor.email;
+      findVendor.phoneNumber = phoneNumber || findVendor.phoneNumber;
+      findVendor.dob = dob || findVendor.dob;
+      findVendor.businessName = businessName || findVendor.businessName;
+      findVendor.businesstype = businesstype || findVendor.businesstype;
+      findVendor.category = category || findVendor.category;
+      let updateVendor = await VendorModel.findOneAndUpdate(
+        { _id: vendorId },
+        updateVendor,
+        { new: true }
+      );
+      return res.status(200).json({ Success: "Updates", user: updateVendor });
+    } catch (error) {
+      console.log("error:", error);
+    }
+  }
+
   async getAllUser(req, res) {
     try {
       let allUser = await VendorModel.find({});
@@ -292,6 +315,86 @@ class vendorProfile {
     let isUser = await VendorModel.findOne({ _id: id });
     if (isUser) {
       return res.json({ NewUser: isUser });
+    }
+  }
+
+  async getUsersWithPaymentsData(req, res) {
+    try {
+      let User = await VendorModel.aggregate([
+        {
+          $lookup: {
+            from: "paymentgetwaymodels",
+            localField: "_id",
+            foreignField: "userId",
+            as: "PaymentDetails",
+          },
+        },
+      ]);
+      if (User) {
+        console.log("users with payments details");
+        return res.status(200).json({ vendorsPayments: User });
+      }
+    } catch (error) {
+      console.log("Error in getting users with payments");
+    }
+  }
+
+  async productsLimites(req, res) {
+    try {
+      let userId = req.params.id;
+      let { ProductLimits } = req.body;
+      let data = await VendorModel.findOneAndUpdate(
+        { _id: userId },
+        {
+          ProductLimits,
+        },
+        { new: true } // Return the updated document
+      );
+      if (data) {
+        return res.status(200).json({ Success: "Added", user: data });
+      } else {
+        return res.status(400).json({ Error: "Not added", user: data });
+      }
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "Something happen when limiting the products" });
+    }
+  }
+
+  async vendorapprove(req, res) {
+    let id = req.params.id;
+    try {
+      await VendorModel.findOneAndUpdate(
+        { _id: id },
+        { vendorstatus: "approved" }
+      )
+        .then((data) => {
+          return res.json({ Success: " Vendor registration approved" });
+        })
+        .catch((err) => {
+          return res.status({ error: "Something went wrong" });
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async vendordisapprove(req, res) {
+    let id = req.params.id;
+    try {
+      await VendorModel.findOneAndUpdate(
+        { _id: id },
+        { vendorstatus: "disapproved" } // Change the status to "disapproved"
+      )
+        .then((data) => {
+          return res.json({ Success: "Vendor registration disapproved" });
+        })
+        .catch((err) => {
+          return res.status(500).json({ error: "Something went wrong" }); // Use status code 500 for internal server error
+        });
+    } catch (error) {
+      console.log(error);
     }
   }
 }
