@@ -57,19 +57,10 @@ const Vendor = new Schema({
   businesstype: {
     type: String,
   },
-  adharfrontendimg: {
-    type: String,
-  },
-  adharbackendimg: {
-    type: String,
-  },
-  panimg: {
+  paymentStatus: {
     type: String,
   },
   selfie: {
-    type: String,
-  },
-  vendorstatus: {
     type: String,
   },
   customNumber: {
@@ -87,10 +78,22 @@ const Vendor = new Schema({
   websiteaddress: {
     type: String,
   },
+  myReferalCode: {
+    type: String,
+  },
+  referalCode: {
+    type: String,
+  },
   gst: {
     type: String,
   },
   accountname: {
+    type: String,
+  },
+  packageId: {
+    type: String,
+  },
+  vendorId: {
     type: String,
   },
   accountnumber: {
@@ -105,14 +108,18 @@ const Vendor = new Schema({
   longitude: {
     type: Number,
   },
-  referalCode: {
+  city: {
     type: String,
   },
-  myreferalCode: {
+
+  adharfrontendimg: {
     type: String,
   },
-  ProductLimits: {
-    type: Number,
+  adharbackendimg: {
+    type: String,
+  },
+  panimg: {
+    type: String,
   },
   createAt: {
     type: Date,

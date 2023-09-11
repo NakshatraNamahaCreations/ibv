@@ -1,46 +1,47 @@
 import React, { useEffect, useState } from "react";
-import Header from "./layout/Header";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import DataTable from "react-data-table-component";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Sidebar from "../components/layout/Sidebar";
 
 function VendorManagement() {
-  const apiURL = process.env.REACT_APP_API_URL;
-  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [search, setsearch] = useState("");
   const [filterdata, setfilterdata] = useState([]);
-  const [data, setdata] = useState([]);
+  const [vendorPaymentsData, setVendorPaymentsData] = useState([]);
   const [rowdata, setrowdata] = useState([]);
   const [smShow, setSmShow] = useState(false);
   const handleClose = () => setSmShow(false);
   const handleShow = () => setSmShow(true);
-  const navigate = useNavigate();
+
+  const getvendorWithPayments = async () => {
+    try {
+      let res = await axios.get(
+        "http://api.infinitimart.in/api/vendor/getuserswithpaymentsdata"
+      );
+      if (res.status === 200) {
+        const vendorsPayments = res.data?.vendorsPayments;
+        setVendorPaymentsData(vendorsPayments);
+        console.log("vendorPaymentsData", vendorsPayments);
+        setfilterdata(vendorsPayments);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    getvendor();
+    getvendorWithPayments();
   }, []);
-
-  const getvendor = async () => {
-    try {
-      let res = await axios.get(apiURL+"/vendor/getalluser");
-      if (res.status === 200) {
-        console.log("data--", data);
-        setdata(res.data?.vendorprofile);
-        setfilterdata(res.data?.vendorprofile);
-      }
-    } catch (error) {}
-  };
 
   const approvevendor = async (e) => {
     e.preventDefault();
     try {
       const config = {
-        url: `/vendor/approvevendor/${rowdata._id}`,
+        url: `/approvevendor/${rowdata._id}`,
         method: "post",
-        baseURL: apiURL,
+        baseURL: "http://api.infinitimart.in/api/vendor",
         headers: { "content-type": "application/json" },
         data: {
           vendorstatus: "approved",
@@ -48,29 +49,12 @@ function VendorManagement() {
       };
       await axios(config).then(function (response) {
         if (response.status === 200) {
-          // alert("Vendor registration has been successfully approved");
           window.location.reload("");
         }
       });
     } catch (error) {
       console.error(error);
       alert("  Not approved");
-    }
-  };
-
-  const deleteVendor = async (rowdata) => {
-    try {
-      axios
-        .post(apiURL+`/vendor/deletevendor/` + rowdata)
-        .then(function (res) {
-          if (res.status === 200) {
-            alert(res.data.success);
-            window.location.reload();
-          }
-        });
-    } catch (error) {
-      console.log(error);
-      alert(error.response.error);
     }
   };
 
@@ -117,7 +101,13 @@ function VendorManagement() {
       cell: (row) => (
         <div>
           {row.vendorstatus ? (
-            <p style={{ fontSize: "12px", color: "#ffc217" }}>
+            <p
+              style={{
+                fontSize: "15px",
+                color: "#ffc217",
+                fontWeight: "bolder",
+              }}
+            >
               Approved <i class="fa-regular fa-circle-check"></i>{" "}
             </p>
           ) : (
@@ -136,13 +126,9 @@ function VendorManagement() {
       name: "Action",
       cell: (row) => (
         <>
-          <button
-            className="bt"
-            style={{ border: 0, backgroundColor: "maroon", color: "white" }}
-            onClick={() => deleteVendor(row._id)}
-          >
-            Delete
-          </button>
+          <Link to="/Vendorprofile" state={{ item: row }}>
+            <b className="vendor-mng-view"> View </b>
+          </Link>
         </>
       ),
     },
@@ -152,23 +138,55 @@ function VendorManagement() {
     setrowdata(data);
     handleShow(true);
   };
+  // const handleSearch = () => {
+  //   console.log("search:", search);
+  //   const filterResults = vendorPaymentsData.filter((item) => {
+  //     console.log("item:", item)
+  //     const itemFirstName = item.firstname
+  //       .toLowerCase()
+  //       .includes(search?.toLowerCase() ) ?? true;
+  //     return itemFirstName;
+  //   });
+  //   setfilterdata(filterResults);
+  // };
 
   // useEffect(() => {
-  //   const result = data.filter((item) => {
-  //     console.log(item)
-  //     return item.firstname.toLowerCase().match(search.toLowerCase());
-  //   });
-  //   setfilterdata(result);
-  // }, [search]);
+  //   const handleSearch = () => {
+  //     console.log("search:", search);
+  //     const filterResults = vendorPaymentsData
+  //     const filterResults = vendorPaymentsData.filter((item) => {
+  //       console.log("item:", item);
+  //       const itemFirstName =
+  //         item.firstname.toLowerCase().includes(search?.toLowerCase() ?? "") ??
+  //         true;
+  //       return itemFirstName;
+  //     });
+  //     console.log("filterResults:", filterResults);
+  //     setfilterdata(filterResults);
+  //   };
+  //   handleSearch();
+  // }, [third])
 
-  const handleRowClick = (row) => {
-    navigate(`/Vendorprofile/${row._id}`);
-  };
+  useEffect(() => {
+    const searchResults = () => {
+      let results = vendorPaymentsData;
+      if (search) {
+        results = results.filter(
+          (item) =>
+            item.firstname &&
+            item.firstname.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+      setfilterdata(results);
+    };
+    searchResults();
+  }, [search]);
+  // useEffect(() => {
+  //   handleSearch();
+  // }, [search]);
 
   return (
     <div className="row me-0">
-      {/* {isConnected ? (
-        <> */}
       <div className="col-md-2">
         <Sidebar />
       </div>
@@ -188,13 +206,13 @@ function VendorManagement() {
         <div className="mt-1 border">
           <DataTable
             columns={columns}
-            data={data?.slice(1)}
+            data={filterdata?.slice(1)}
+            // data={filterdata}
             pagination
             fixedHeader
             selectableRowsHighlight
             subHeaderAlign="left"
             highlightOnHover
-            onRowClicked={handleRowClick}
           />
         </div>
       </div>
@@ -204,11 +222,6 @@ function VendorManagement() {
         onHide={() => setSmShow(false)}
         aria-labelledby="example-modal-sizes-title-sm"
       >
-        {/* <Modal.Header closeButton>
-          <Modal.Title id="example-modal-sizes-title-sm">
-            Vendor Approve
-          </Modal.Title>
-        </Modal.Header> */}
         <Modal.Body>
           Are you absolutely certain about approving this vendor?
         </Modal.Body>
@@ -221,17 +234,6 @@ function VendorManagement() {
           </Button>
         </Modal.Footer>
       </Modal>
-      {/* </>
-      ) : (
-        <div className="text-center">
-          <img
-            src="../images/no-internet.png"
-            alt=""
-            style={{ width: "25%", borderRadius: "50%" }}
-          />
-          <h1>Please connect to the internet to use this application.</h1>
-        </div>
-      )} */}
     </div>
   );
 }

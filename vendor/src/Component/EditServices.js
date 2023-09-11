@@ -1,42 +1,24 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Form } from "react-bootstrap";
+import InputRange from "react-input-range";
 
-function EditServices() {
+function EditServices(props) {
+  const serviceObj = props.servicesData;
+  console.log("servicesData", serviceObj);
   const user = JSON.parse(sessionStorage.getItem("vendor"));
-  const apiURL = process.env.REACT_APP_API_URL;
-  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
+
   const [category, setcategory] = useState("");
   const [subcatagory, setSubcatagory] = useState("");
-  const [selectedProduct, setSelectedService] = useState("");
   const [subcatagorydata, setSubCatagorydata] = useState([]);
-  const [productData, setProductData] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [showPriceDetail, setShowPriceDetails] = useState(false);
   const [changeServiceName, setChangeServiceName] = useState("");
   const [changeServiceBrand, setChangeServiceBrand] = useState("");
   const [changeServiceImage, setChangeServiceImage] = useState("");
-  const [changeServiceSize, setChangeServiceSize] = useState("");
-  const [changeServiceQuantity, setChangeServiceQuantity] = useState("");
-  const [changeServicePrice, setChangeServicePrice] = useState("");
   const [changeServiceDescription, setChangeServiceDescription] = useState("");
-
-  useEffect(() => {
-    getProductBySubcatagory();
-  }, [subcatagory]);
-  const getProductBySubcatagory = async () => {
-    try {
-      const res = await axios.post(
-        apiURL+`/vendor/services/productlist/serviceproductbysubcatagory`,
-        { serviceSubcatagoryName: subcatagory } // Pass the subcategory ID as the request payload
-      );
-      if (res.status === 200) {
-        console.log("Product", res);
-        setProductData(res.data?.product);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const [changeServicePrice, setChangeServicePrice] = useState(0);
+  const [minValue, setMinValue] = useState(1);
+  const [maxValue, setMaxValue] = useState(100000);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -47,25 +29,48 @@ function EditServices() {
   useEffect(() => {
     getSubcategoriesByCategory();
   }, [category]);
+
   const getSubcategoriesByCategory = async () => {
     try {
       let res = await axios.post(
-        apiURL+`/vendor/services/subcatagory/postsubcatagoryservicesbycatagory/`,
+        `http://api.infinitimart.in/api/vendor/services/subcatagory/postsubcatagoryservices/`,
         {
           catagoryName: category,
         }
       );
       if (res.status === 200) {
         console.log("subcatagory", res);
-        setSubCatagorydata(res.data?.subcatagory);
+        setSubCatagorydata(res.data?.success);
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  const handleMinInputChange = (e) => {
+    const newMinValue = parseInt(e.target.value, 10);
+    if (newMinValue < 1) {
+      setMinValue(1);
+    } else if (newMinValue > maxValue) {
+      setMinValue(maxValue);
+    } else {
+      setMinValue(newMinValue);
+    }
+  };
+
+  const handleMaxInputChange = (e) => {
+    const newMaxValue = parseInt(e.target.value, 10);
+    if (newMaxValue > 100000) {
+      setMaxValue(100000);
+    } else if (newMaxValue < minValue) {
+      setMaxValue(minValue);
+    } else {
+      setMaxValue(newMaxValue);
+    }
+  };
+
   const updateService = async (e) => {
-    const productId = selectedProduct;
+    const serviceId = serviceObj._id;
     const formdata = new FormData();
     e.preventDefault();
     formdata.append("userId", user._id);
@@ -73,23 +78,21 @@ function EditServices() {
     formdata.append("serviceSubcatagoryName", subcatagory);
     formdata.append("serviceProductName", changeServiceName);
     formdata.append("serviceProductPrice", changeServicePrice);
+    formdata.append("serviceProductRange", minValue && minValue);
     formdata.append("serviceProductBrand", changeServiceBrand);
-    formdata.append("serviceProductSize", changeServiceSize);
     formdata.append("serviceProductImage", changeServiceImage);
-    formdata.append("serviceProductQuantity", changeServiceQuantity);
     formdata.append("serviceProductDescription", changeServiceDescription);
-    formdata.append("serviceProductStatus", "Active");
     try {
       const config = {
-        url: `/vendor/services/productlist/updateservice/${productId}`,
+        url: `/vendor/services/productlist/updateservice/${serviceId}`,
         method: "post",
-        baseURL: apiURL,
+        baseURL: "http://api.infinitimart.in/api",
         data: formdata,
       };
       await axios(config).then(function (res) {
         if (res.status === 200) {
           console.log("success");
-          alert("Product Updated");
+          alert("Service Updated");
           window.location.reload();
         }
       });
@@ -102,7 +105,7 @@ function EditServices() {
   return (
     <div>
       <div>
-        <a href="/contentmanagement">
+        <a href="/services">
           <i class="fa-solid fa-angles-left"></i> Go Back
         </a>
       </div>
@@ -110,212 +113,182 @@ function EditServices() {
       <div>
         <h3>Edit Services</h3>
       </div>
-      <div className="d-flex" style={{ justifyContent: "space-around" }}>
-        <div>
-          <label>Choose Catagory:</label>{" "}
-          <select
-            className="edit-pro-select"
-            onChange={(e) => setcategory(e.target.value)}
-          >
-            <option value="">Select</option>
-            <option key={user.category} value={user.category}>
-              {user.category}{" "}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label>Choose SubCatagory:</label>{" "}
-          <select
-            className="edit-pro-select"
-            onChange={(e) => setSubcatagory(e.target.value)}
-          >
-            <option value="">Select</option>
-            {subcatagorydata?.map((subcatagory) => (
-              <option
-                key={subcatagory.SubcatagoryName}
-                value={subcatagory.SubcatagoryName}
-              >
-                {subcatagory.SubcatagoryName}{" "}
+
+      <div className="row">
+        <div className="col-md-6">
+          <div>
+            <label className="pb-2 edit-lable">Choose Catagory:</label> <br />
+            <select
+              className="edit-pro-select"
+              onChange={(e) => setcategory(e.target.value)}
+            >
+              <option value="">Select</option>
+              <option key={user.category} value={user.category}>
+                {user.category}{" "}
               </option>
-            ))}
-          </select>
+            </select>
+          </div>
+          <br />
+          <div>
+            <label className="pb-2 edit-lable">Product Name</label>
+            <br />
+            <input
+              className="edit-input"
+              defaultValue={
+                serviceObj.serviceProductName
+                  ? serviceObj.serviceProductName
+                  : ""
+              }
+              onChange={(e) => setChangeServiceName(e.target.value)}
+            />
+          </div>
+          <br />
+          <div>
+            <label className="pb-2 edit-lable">Brand</label>
+            <br />
+            <input
+              className="edit-input"
+              defaultValue={
+                serviceObj.serviceProductBrand
+                  ? serviceObj.serviceProductBrand
+                  : ""
+              }
+              onChange={(e) => setChangeServiceBrand(e.target.value)}
+            />
+          </div>
+          <br />{" "}
+          <div>
+            <label className="pb-2 edit-lable">Service Price</label>
+            <br />
+            <input
+              className="edit-input"
+              defaultValue={
+                serviceObj.serviceProductPrice
+                  ? serviceObj.serviceProductPrice
+                  : ""
+              }
+              onChange={(e) => setChangeServicePrice(e.target.value)}
+            />
+          </div>
+          <br />
+          <div>
+            <label className="pb-2 edit-lable">Description</label>
+            <br />
+            <textarea
+              className="edit-textarea"
+              defaultValue={
+                serviceObj?.serviceProductDescription
+                  ? serviceObj?.serviceProductDescription
+                  : ""
+              }
+              onChange={(e) => setChangeServiceDescription(e.target.value)}
+            />
+          </div>
         </div>
-        <div>
-          <label>Select Product:</label>{" "}
-          <select
-            className="edit-pro-select"
-            value={selectedProduct}
-            onChange={(e) => setSelectedService(e.target.value)}
-          >
-            <option value="">Select</option>
-            {productData?.map((product) => (
-              <option key={product._id} value={product._id}>
-                {product.serviceProductName}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <br />
-      <hr />
-      {selectedProduct ? (
-        <>
-          <div className="row">
-            <div className="col-md-6">
+        <div className="col-md-6">
+          <div>
+            <label className="pb-2 edit-lable">Choose SubCatagory:</label>{" "}
+            <br />
+            <select
+              className="edit-pro-select"
+              onChange={(e) => setSubcatagory(e.target.value)}
+            >
+              <option value="">Select</option>
+              {subcatagorydata?.map((subcatagory) => (
+                <option
+                  key={subcatagory.SubcatagoryName}
+                  value={subcatagory.SubcatagoryName}
+                >
+                  {subcatagory.SubcatagoryName}{" "}
+                </option>
+              ))}
+            </select>
+          </div>
+          <br />
+          <div className="d-flex" style={{ justifyContent: "space-around" }}>
+            <div>
+              <label className="pb-2 edit-lable">Product Image</label>
               <br />
-              <div>
-                <label className="pb-2 edit-lable">Product Name</label>
-                <br />
-                <input
-                  className="edit-input"
-                  defaultValue={
-                    productData.find(
-                      (product) => product._id === selectedProduct
-                    )?.serviceProductName || ""
-                  }
-                  onChange={(e) => setChangeServiceName(e.target.value)}
+              {selectedImage && (
+                <img
+                  className="edit-product-image"
+                  src={selectedImage}
+                  alt="Uploaded"
+                  onChange={(e) => setChangeServiceImage(e.target.files[0])}
                 />
-              </div>
-              <br />
-              <div>
-                <label className="pb-2 edit-lable">Brand</label>
-                <br />
-                <input
-                  className="edit-input"
-                  defaultValue={
-                    productData.find(
-                      (product) => product._id === selectedProduct
-                    )?.serviceProductBrand || ""
-                  }
-                  onChange={(e) => setChangeServiceBrand(e.target.value)}
+              )}
+              {!selectedImage && (
+                <img
+                  src={`http://api.infinitimart.in/ServiceProductList/${
+                    serviceObj?.serviceProductImage || ""
+                  }`}
+                  className="edit-product-image"
+                  alt=""
                 />
-              </div>
-              <br />
-              <div>
-                <label className="pb-2 edit-lable">Description</label>
-                <br />
-                <textarea
-                  className="edit-textarea"
-                  defaultValue={
-                    productData.find(
-                      (product) => product._id === selectedProduct
-                    )?.serviceProductDescription || ""
-                  }
-                  onChange={(e) => setChangeServiceDescription(e.target.value)}
-                />
-              </div>
+              )}
             </div>
-            <div className="col-md-6">
-              <div
-                className="d-flex"
-                style={{ justifyContent: "space-around" }}
-              >
+            <div className="ms-2 ">
+              <label className="pb-2 edit-lable">Upload Product Image</label>
+              <input type="file" onChange={handleImageChange} />
+            </div>
+          </div>
+          <br />
+          <div className="d-flex" style={{ justifyContent: "space-between" }}>
+            <Form.Group controlId="formGridZip" className="product-grid">
+              <Form.Label className="mb-3">Service Range</Form.Label>
+              <div className="d-flex mb-4 ">
                 <div>
-                  <label className="pb-2 edit-lable">Product Image</label>
-                  <br />
-                  {selectedImage && (
-                    <img
-                      className="edit-product-image"
-                      src={selectedImage}
-                      alt="Uploaded"
-                      onChange={(e) => setChangeServiceImage(e.target.files[0])}
-                    />
-                  )}
-                  {!selectedImage && (
-                    <img
-                      src={imgURL+`/ServiceProductList/${
-                        productData.find(
-                          (product) => product._id === selectedProduct
-                        )?.serviceProductImage || ""
-                      }`}
-                      className="edit-product-image"
-                      alt=""
-                    />
-                  )}
-                </div>
-                <div className="ms-2 ">
-                  <label className="pb-2 edit-lable">
-                    Upload Product Image
-                  </label>
-                  <input type="file" onChange={handleImageChange} />
-                </div>
-              </div>
-              <br />
-              <div
-                className="d-flex"
-                style={{ justifyContent: "space-between" }}
-              >
-                <div>
-                  <label className="pb-2 edit-lable">Size</label>
-                  <br />
+                  <label
+                    style={{
+                      color: "#a9042e",
+                      fontSize: "11px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Min Value:
+                  </label>{" "}
                   <input
-                    className="edit-input"
-                    defaultValue={
-                      productData.find(
-                        (product) => product._id === selectedProduct
-                      )?.serviceProductSize || ""
-                    }
-                    style={{ width: "100%" }}
-                    onChange={(e) => setChangeServiceSize(e.target.value)}
+                    type="number"
+                    placeholder="1"
+                    style={{ width: "50%" }}
+                    value={minValue}
+                    onChange={handleMinInputChange}
                   />
                 </div>
-                <div className="mt-4">
-                  <label className="pb-2 edit-lable">Add Price Range</label> :{" "}
-                  <span>
-                    <i
-                      class="fa-solid fa-circle-plus"
-                      style={{ cursor: "pointer" }}
-                      onClick={() => setShowPriceDetails(!showPriceDetail)}
-                    ></i>
-                  </span>
-                </div>
-                <div></div>
-              </div>
-              <br />
-              {showPriceDetail ? (
-                <>
-                  <div
-                    className="d-flex"
-                    style={{ justifyContent: "space-between" }}
+                <div>
+                  <label
+                    style={{
+                      color: "#a9042e",
+                      fontSize: "11px",
+                      fontWeight: 500,
+                    }}
                   >
-                    <div>
-                      <label className="pb-2 edit-lable">Product Range</label>
-                      <br />
-                      <select
-                        style={{ width: "100%" }}
-                        onChange={(e) =>
-                          setChangeServiceQuantity(e.target.value)
-                        }
-                      >
-                        <option>Select</option>
-                        <option value="1-1000">1-1000 </option>
-                        <option value="1k-10k">1k-10k</option>
-                        <option value="10k-1Lakhs">10k-1Lakhs</option>
-                        <option value="Above">Above</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="pb-2 edit-lable">Product Price</label>
-                      <br />
-                      <input
-                        className="edit-input"
-                        placeholder="Enter Price Range"
-                        style={{ width: "100%" }}
-                        onChange={(e) => setChangeServicePrice(e.target.value)}
-                        defaultValue={
-                          productData.find(
-                            (product) => product._id === selectedProduct
-                          )?.serviceProductPrice || ""
-                        }
-                      />
-                    </div>
-                    <div></div>
-                  </div>
-                </>
-              ) : (
-                ""
-              )}
-              {/* <div>
+                    Max Value:
+                  </label>{" "}
+                  <input
+                    type="number"
+                    placeholder="100000"
+                    style={{ width: "50%" }}
+                    value={maxValue}
+                    onChange={handleMaxInputChange}
+                  />
+                </div>
+              </div>
+              <InputRange
+                maxValue={100000}
+                minValue={1}
+                value={{ min: minValue, max: maxValue }}
+                onChange={(newRange) => {
+                  setMinValue(newRange.min);
+                  setMaxValue(newRange.max);
+                }}
+              />
+            </Form.Group>
+            <div></div>
+          </div>
+          <br />
+
+          {/* <div>
                 <label className="pb-2 edit-lable">
                   Price (INR): {price}
                   .00{" "}
@@ -336,16 +309,12 @@ function EditServices() {
                   }
                 />
               </div> */}
-              <br />
-              <button className="save-prod-search-btn" onClick={updateService}>
-                UPDATE
-              </button>
-            </div>
-          </div>
-        </>
-      ) : (
-        <p style={{ textAlign: "center", color: "maroon" }}>Search product</p>
-      )}
+          <br />
+          <button className="save-prod-search-btn" onClick={updateService}>
+            UPDATE
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

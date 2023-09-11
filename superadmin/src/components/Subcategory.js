@@ -7,29 +7,45 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/layout/Sidebar";
 import ReactPaginate from "react-paginate";
+import DataTable from "react-data-table-component";
+import { Modal } from "react-bootstrap";
 
 function SubCategory() {
-  const apiURL = process.env.REACT_APP_API_URL;
-  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [catagory, setCatagory] = useState([]);
-  const [Subcatagory, setSubcatagory] = useState([]);
+  const [subCatagory, setSubCatagory] = useState([]);
   const [catagoryName, setCatagoryName] = useState("");
   const [subcatagoryName, setSubcatagoryName] = useState("");
   const [subcatagory_image, setSubcatagory_image] = useState();
+  //search
+  const [searchSubCategory, setSearchSubCategory] = useState("");
+  const [filterdata, setfilterdata] = useState([]);
 
-  //pagination
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 10; // Number of items to display per page
-  const pageCount = Math.ceil(Subcatagory?.length / itemsPerPage);
-  const offset = currentPage * itemsPerPage;
-  const currentPageData = Subcatagory?.slice(offset, offset + itemsPerPage);
+  // Edit
+  const [editCatagoryName, setEditCatagoryName] = useState("");
+  const [editSubcategoryName, setEditSubcategoryName] = useState("");
+  const [editSubcatagoryImage, setEditSubcatagoryImage] = useState(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editSubcategory, setEditSubcategory] = useState({});
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  // Handle page change
-  const handlePageChange = ({ selected }) => {
-    setCurrentPage(selected);
+  const handleEdit = (category) => {
+    setEditSubcategory(category);
+    handleShowPopUp(true);
   };
 
-  console.log(catagoryName);
+  const handleShowPopUp = () => {
+    setShowEdit(true);
+  };
+  const handleClose = () => {
+    setShowEdit(false); // Hide the edit form after submitting it or canceling it by pressing
+  };
+
+  //choose image
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    setSelectedImage(URL.createObjectURL(file));
+    setEditSubcatagoryImage(file);
+  };
   const AddSubCatagory = async (e) => {
     const formdata = new FormData();
     e.preventDefault();
@@ -40,14 +56,14 @@ function SubCategory() {
       const config = {
         url: "/vendor/product/subcatagory/addsubcatagory",
         method: "post",
-        baseURL: apiURL,
+        baseURL: "http://api.infinitimart.in/api",
         data: formdata,
       };
       await axios(config).then(function (res) {
         if (res.status === 200) {
           console.log("success");
-          alert("Subcatagory Added");
-          window.location.reload();
+          alert(res.data.success);
+          getAllSubCatagory();
         }
       });
     } catch (error) {
@@ -63,7 +79,7 @@ function SubCategory() {
 
   const getAllCatagory = async () => {
     let res = await axios.get(
-      apiURL+"/vendor/product/catagory/getcatagory"
+      "http://api.infinitimart.in/api/vendor/product/catagory/getcatagory"
     );
     if (res.status === 200) {
       console.log("catagory===", res);
@@ -71,28 +87,29 @@ function SubCategory() {
     }
   };
 
-  console.log(Subcatagory)
   const getAllSubCatagory = async () => {
     let res = await axios.get(
-      apiURL+"/vendor/product/subcatagory/getsubcatagory"
+      "http://api.infinitimart.in/api/vendor/product/subcatagory/getsubcatagory"
     );
     if (res.status === 200) {
       console.log("subcatagory===", res);
-      setSubcatagory(res.data?.subcategory);
+      setSubCatagory(res.data?.subcategory);
+      setfilterdata(res.data?.subcategory);
     }
   };
 
-  const deletecatagory = async (data) => {
+  const deleteSubCatagory = async (data) => {
     try {
       axios
         .post(
-          apiURL+`/vendor/product/subcatagory/deletesubcatagory/` +
+          `http://api.infinitimart.in/api/vendor/product/subcatagory/deletesubcatagory/` +
             data._id
         )
         .then(function (res) {
           if (res.status === 200) {
             console.log(res.data);
-            window.location.reload();
+            alert(res.data.success);
+            getAllSubCatagory(); // Refresh the subcategory list
           }
         });
     } catch (error) {
@@ -101,22 +118,115 @@ function SubCategory() {
     }
   };
 
-  var i = 1;
-  return (
-    <div className="row">
-      <div className="col-md-2">
-        <Sidebar />
-      </div>
+  const updateCategory = async () => {
+    try {
+      const subCategoryId = editSubcategory._id;
+      const formdata = new FormData();
+      formdata.append("catagoryName", editCatagoryName);
+      formdata.append("SubcatagoryName", editSubcategoryName);
+      if (editSubcatagoryImage) {
+        formdata.append("SubcatagoryImage", editSubcatagoryImage);
+      }
 
-      <div className="col-md-10 pt-3">
-        <div className="mt-3 p-2">
-          <h4>Subcatagory </h4>
-        </div>
-        <div>
-          <div
-            className="d-flex pt-3 pb-3"
-            style={{ justifyContent: "space-between" }}
-          >
+      const config = {
+        url: `/vendor/product/subcatagory/updateproductsubcategory/${subCategoryId}`,
+        method: "put",
+        baseURL: "http://api.infinitimart.in/api",
+        data: formdata,
+      };
+      const response = await axios(config);
+      if (response.status === 200) {
+        console.log("success");
+        alert(response.data.message);
+        getAllSubCatagory(); // Refresh the subcategory list
+        setShowEdit(false); // Close the modal
+      }
+    } catch (error) {
+      console.log(error);
+      alert("Unable to complete the request");
+    }
+  };
+
+  const columns = [
+    {
+      name: "S.No",
+      selector: (row, index) => index + 1,
+    },
+    {
+      name: "Category",
+      selector: (row, index) => row.catagoryName,
+    },
+    {
+      name: "Subcategory",
+      selector: (row, index) => row.SubcatagoryName,
+    },
+    {
+      name: "Image",
+      selector: (row, index) => (
+        <>
+          <img
+            src={`http://api.infinitimart.in/subcatagory/${row.SubcatagoryImage}`}
+            alt=""
+            style={{ padding: "7px", width: "50%" }}
+          />
+        </>
+      ),
+    },
+    {
+      name: "Action",
+      selector: (row) => (
+        <>
+          <span>
+            <i
+              class="fa-solid fa-pen-to-square edit-icon"
+              title="Edit"
+              onClick={() => handleEdit(row)}
+            ></i>
+          </span>{" "}
+          /{" "}
+          <span>
+            <i
+              class="fa-solid fa-trash delete-icon"
+              title="Delete"
+              onClick={() => deleteSubCatagory(row)}
+            ></i>
+          </span>
+        </>
+      ),
+    },
+  ];
+
+  useEffect(() => {
+    const searchResults = () => {
+      let results = subCatagory;
+      if (searchSubCategory) {
+        results = results.filter(
+          (item) =>
+            item.SubcatagoryName &&
+            item.SubcatagoryName.toLowerCase().includes(
+              searchSubCategory.toLowerCase()
+            )
+        );
+      }
+      setfilterdata(results);
+    };
+    searchResults();
+  }, [searchSubCategory]);
+  return (
+    <div>
+      <div>
+        <div
+          className="d-flex pt-3 pb-3"
+          style={{ justifyContent: "space-between" }}
+        >
+          <div>
+            <Form.Control
+              type="text"
+              placeholder="Search by Subcategory"
+              onChange={(e) => setSearchSubCategory(e.target.value)}
+            />
+          </div>
+          <div>
             <button
               type="button"
               class="btn btn-primary _btn"
@@ -125,65 +235,19 @@ function SubCategory() {
             >
               Add Subcategory
             </button>
-            <ReactPaginate
-              previousLabel={"Previous"}
-              nextLabel={"Next"}
-              breakLabel={"..."}
-              breakClassName={"break-me"}
-              pageCount={pageCount}
-              marginPagesDisplayed={2}
-              pageRangeDisplayed={5}
-              onPageChange={handlePageChange}
-              containerClassName={"pagination"}
-              subContainerClassName={"pages pagination"}
-              activeClassName={"pagination-active"}
-            />
           </div>
-          <table class="table table-hover table-bordered mt-2">
-            <thead className="">
-              <tr className="table-secondary">
-                <th className="table-head" scope="col">
-                  S.No
-                </th>
-                <th className="table-head" scope="col">
-                  Category Name
-                </th>
-                <th className="table-head" scope="col">
-                  Subcategory Name
-                </th>
-                <th className="table-head" scope="col" style={{ width: "25%" }}>
-                  Subcategory Image
-                </th>
-                <th className="table-head" style={{ width: "10%" }} scope="col">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {Subcatagory?.map((data) => (
-                <tr className="user-tbale-body">
-                  <td className="text-center">{i++} </td>
-                  <td className="text-center">{data.catagoryName}</td>
-                  <td className="text-center"> {data.SubcatagoryName} </td>
-                  <td style={{ textAlign: "center" }}>
-                    <img
-                      src={imgURL+`/subcatagory/${data.SubcatagoryImage}`}
-                      alt=""
-                      width="31%"
-                    />
-                  </td>
-                  <td className="text-center">
-                    <i
-                      title="Delete"
-                      class="fa-solid fa-trash"
-                      style={{ color: "#a9042e", cursor: "pointer" }}
-                      onClick={() => deletecatagory(data)}
-                    ></i>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>{" "}
+        </div>
+        <div>
+          {" "}
+          <DataTable
+            columns={columns}
+            data={filterdata}
+            pagination
+            fixedHeader
+            selectableRowsHighlight
+            subHeaderAlign="left"
+            highlightOnHover
+          />
         </div>
       </div>
 
@@ -258,6 +322,74 @@ function SubCategory() {
           </div>
         </div>
       </div>
+      {/* Edit Modal=============================================== */}
+      <Modal
+        show={showEdit}
+        onHide={handleClose}
+        keyboard={false}
+        backdrop="static"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Edit</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h6>Select Category</h6>
+          <select
+            className="p-2"
+            // defaultValue={editSubcategory?.SubcatagoryName}
+            style={{ width: "70%" }}
+            onChange={(e) => {
+              setEditCatagoryName(e.target.value);
+            }}
+          >
+            {catagory.map((data) => (
+              <option value={data.catagoryName}>{data.catagoryName} </option>
+            ))}
+          </select>
+          <br /> <br />
+          <h6>Subcategory Name</h6>
+          <input
+            className="p-2"
+            style={{ width: "70%" }}
+            defaultValue={editSubcategory?.SubcatagoryName}
+            onChange={(e) => {
+              setEditSubcategoryName(e.target.value);
+            }}
+          />
+          <br /> <br />
+          <h6>Subcategory Image</h6>
+          {!selectedImage && (
+            <img
+              className="pt-2"
+              src={`http://api.infinitimart.in/subcatagory/${editSubcategory?.SubcatagoryImage}`}
+              alt=""
+              width="25%"
+            />
+          )}
+          <div className="ms-2 ">
+            {selectedImage && (
+              <img
+                className="edit-product-image"
+                src={selectedImage}
+                alt="Uploaded"
+                width="25%"
+              />
+            )}
+          </div>{" "}
+          <br />
+          <div className="ms-2 ">
+            <label className="pb-2 edit-lable">
+              <h6>Upload Subcategory Image</h6>
+            </label>
+            <input type="file" onChange={handleImageChange} />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <button className="update-button" onClick={updateCategory}>
+            Update
+          </button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

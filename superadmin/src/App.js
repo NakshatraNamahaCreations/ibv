@@ -21,8 +21,11 @@ import Servicescategory from "./components/Servicescategory";
 import Servicessubcategory from "./components/Servicessubcategory";
 import Vendorprofile from "./components/Vendorprofile";
 import Dashboard from "./components/Dashboard";
-import Banner from "./components/Banner";
 import Review from "./components/Review";
+import Invoice from "./components/Invoice";
+import ProductBanner from "./components/ProductBanner";
+import VendorUpdates from "./components/VendorUpdates";
+import SubAdminAccess from "./components/SubAdminAccess";
 
 function App() {
   return (
@@ -132,7 +135,8 @@ function App() {
             </>
           }
         />
-        <Route path="/Vendorprofile/:id" element={<Vendorprofile />} />
+        <Route path="/Vendorprofile" element={<Vendorprofile />} />
+        {/* <Route path="/Vendorprofile/:id" element={<Vendorprofile />} /> */}
         {/* <Route
           path="/banner"
           element={
@@ -143,18 +147,37 @@ function App() {
                 </>
               }
             />
-          }
+          } 
         /> */}
         <Route
-          path="/banner"
+          path="/productbanner"
           element={
             <>
               <Header />
-              <Banner />
+              <ProductBanner />
+            </>
+          }
+        />
+        <Route
+          path="/updatevendor"
+          element={
+            <>
+              <Header />
+              <VendorUpdates />
+            </>
+          }
+        />
+        <Route
+          path="/subadminrights"
+          element={
+            <>
+              <Header />
+              <SubAdminAccess />
             </>
           }
         />
         <Route path="/" element={<Login />} />
+        <Route path="/invoice" element={<Invoice />} />
       </Routes>
     </BrowserRouter>
   );

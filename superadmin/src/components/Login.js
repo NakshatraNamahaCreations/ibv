@@ -6,9 +6,47 @@ import { useContext } from "react";
 import { CreateToggle } from "./TogglerProvider";
 
 export function Login() {
-  const apiURL = process.env.REACT_APP_API_URL;
-
   const { toggle, handleshow, handlehide } = useContext(CreateToggle);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      // Make the API request
+      const response = await fetch(
+        "http://api.infinitimart.in/api/superadmin/superadminlogin",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.success);
+        console.log(data.success);
+        // Store admin data in session storage
+        sessionStorage.setItem("adminData", JSON.stringify(data.user));
+
+        // Redirect to dashboard or wherever you need to go
+        // For example, you can use React Router to navigate to the dashboard
+        window.location.assign("/home");
+      } else {
+        // Handle error messages or invalid login
+        console.log(data.error);
+        alert(data.error);
+        // alert("Try again");
+      }
+    } catch (error) {
+      console.error("Error logging in:", error);
+    }
+  };
 
   return (
     <div style={{ height: "100vh" }}>
@@ -23,10 +61,11 @@ export function Login() {
                 <div className="col-6">
                   <img
                     src="./images/frontimage.jpg"
+                    alt=""
                     style={{ width: "100%", height: "500px" }}
                   />
                 </div>
-                <div className="col-6 ">
+                <div className="col-6">
                   <div
                     style={{
                       display: "flex",
@@ -37,7 +76,7 @@ export function Login() {
                     <img
                       src="./images/newlogo.png"
                       className="img-fluid"
-                      style={{ width: "100px" }}
+                      style={{ width: "300px" }}
                       alt=""
                     />
                   </div>
@@ -54,7 +93,11 @@ export function Login() {
                         {" "}
                         <Row className="mb-3">
                           <Form.Group as={Col} controlId="formGridEmail">
-                            <Form.Control type="email" placeholder="Email" />
+                            <Form.Control
+                              type="email"
+                              placeholder="Email"
+                              onChange={(e) => setEmail(e.target.value)}
+                            />
                           </Form.Group>
                         </Row>
                         <Row className="mb-3">
@@ -63,6 +106,7 @@ export function Login() {
                               <Form.Control
                                 type="text"
                                 placeholder="Password"
+                                onChange={(e) => setPassword(e.target.value)}
                               />
                               <i
                                 class="fa-regular fa-eye "
@@ -79,6 +123,7 @@ export function Login() {
                               <Form.Control
                                 type="password"
                                 placeholder="Password"
+                                onChange={(e) => setPassword(e.target.value)}
                               />
 
                               <i
@@ -94,7 +139,7 @@ export function Login() {
                           )}
                         </Row>
                         {/* <toggle/> */}
-                        <Link
+                        {/* <Link
                           style={{
                             position: "absolute",
                             left: "50%",
@@ -103,34 +148,35 @@ export function Login() {
                           to="/Settings"
                         >
                           Forgot Password?
-                        </Link>
+                        </Link> */}
                       </Row>
                     </div>
                   </div>
-                  <div class="form-check" style={{ marginLeft: "114px" }}>
+                  {/* <div class="form-check" style={{ marginLeft: "114px" }}>
                     <Form.Group className="mb-3" id="formGridCheckbox">
                       <Form.Check type="checkbox" label="Remeber me" />
                     </Form.Group>
-                  </div>
+                  </div> */}
                   <div className="text-center pt-3">
-                    <Link to="/home">
-                      <Button
-                        style={{
-                          width: "300px",
-                          padding: "4px",
-                          backgroundColor: "#a9042e",
-                          border: "none",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Login
-                      </Button>
-                    </Link>
-                    <div style={{ margin: "20px" }}>
+                    {/* <Link to="/home"> */}
+                    <Button
+                      style={{
+                        width: "300px",
+                        padding: "4px",
+                        backgroundColor: "#a9042e",
+                        border: "none",
+                        fontWeight: "bold",
+                      }}
+                      onClick={handleLogin}
+                    >
+                      Login
+                    </Button>
+                    {/* </Link> */}
+                    {/* <div style={{ margin: "20px" }}>
                       <Link className="link_but" to="/Signup">
                         or sign up
                       </Link>
-                    </div>
+                    </div> */}
                     <div></div>
                   </div>
                 </div>

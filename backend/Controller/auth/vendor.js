@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs");
 class vendorProfile {
   async createAccount(req, res) {
     try {
-      let {
+      const {
         firstname,
         lastname,
         email,
@@ -23,56 +23,64 @@ class vendorProfile {
         category,
         checkbox,
         websiteaddress,
-        panimg,
+        panImage,
         panNumber,
         selfie,
         gst,
-        referalCode,
-        accountname,
-        accountnumber,
+        vendorId,
+        accountName,
+        accountNumber,
         latitude,
         longitude,
         categoryname,
-        // referalCode,
+        aadhaarNumber,
+        referalCode,
+        packageId,
+        city,
       } = req.body;
 
-      let vendorCount = await VendorModel.findOneAndUpdate(
+      const file = req.files[0]?.filename;
+      const file1 = req.files[1]?.filename;
+      const file2 = req.files[2]?.filename;
+      // const file3 = req.files[3]?.filename;
+
+      const vendorCount = await VendorModel.findOneAndUpdate(
         {},
         { $inc: { count: 1 } },
         { new: true }
       );
 
       if (!vendorCount) {
-        vendorCount = new VendorModel({ count: 1 });
-        await vendorCount.save();
+        const newVendorCount = new VendorModel({ count: 1 });
+        await newVendorCount.save();
       }
 
-      // Check if vendorCount is still undefined
       if (!vendorCount) {
-        console.error("Error retrieving count from database");
         return res.status(500).json({ error: "An error occurred" });
       }
 
-      // Generate the custom number
       const customNumber = `IM2023${vendorCount.count}`;
-      const myreferalCode = `REFIM2023${vendorCount.count}`;
+      const myReferalCode = `REFIM2023${vendorCount.count}`;
 
-      password = bcrypt.hashSync(password, 10);
-      // firstname = toTitleCase(firstname);
-      const Email = await VendorModel.findOne({ email: email });
-      if (Email) {
-        return res.status(500).json({ error: "Email already exits" });
+      console.log("myReferalCode", myReferalCode);
+
+      const hashedPassword = bcrypt.hashSync(password, 10);
+
+      const existingEmail = await VendorModel.findOne({ email });
+      if (existingEmail) {
+        return res.status(400).json({ error: "Email already exists" });
       }
 
-      const phone = await VendorModel.findOne({ phoneNumber: phoneNumber });
-      if (phone) {
-        return res.status(500).json({ error: "mobile number already exits" });
+      const existingPhone = await VendorModel.findOne({ phoneNumber });
+      if (existingPhone) {
+        return res.status(400).json({ error: "Mobile number already exists" });
       }
+
       const newVendor = new VendorModel({
         firstname,
         lastname,
         email,
-        password,
+        password: hashedPassword,
         phoneNumber,
         alternativeNumber,
         dob,
@@ -85,27 +93,36 @@ class vendorProfile {
         category,
         customNumber,
         referalCode,
-        myreferalCode,
+        myReferalCode,
         websiteaddress,
         checkbox,
-        panimg,
+        panImage,
         panNumber,
         selfie,
         gst,
-        accountname,
-        accountnumber,
+        accountName,
+        accountNumber,
         latitude,
         longitude,
         categoryname,
+        aadhaarNumber,
+        adharfrontendimg: file,
+        adharbackendimg: file1,
+        panimg: file2,
+        vendorId,
+        packageId,
+        city,
+        // selfieImage: file3,
       });
-      newVendor.save().then((data) => {
-        console.log(data);
-        return res
-          .status(200)
-          .json({ Success: "Account created. Please login", user: data });
-      });
+
+      const savedVendor = await newVendor.save();
+      console.log(savedVendor);
+      return res
+        .status(201)
+        .json({ success: "Account created. Please login", user: savedVendor });
     } catch (error) {
       console.error("Error creating account:", error);
+      return res.status(500).json({ error: "An error occurred" });
     }
   }
 

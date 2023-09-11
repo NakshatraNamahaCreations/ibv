@@ -82,7 +82,9 @@ class ServiceProductList {
       let service = await ServiceProductListModal.find({});
       if (service) {
         console.log("product", service);
-        return res.json({ service: service });
+        return res.status(200).json({ service: service });
+      } else {
+        return res.status(404).json({ message: "No Services Found" });
       }
     } catch (err) {
       console.log(err);
@@ -123,6 +125,18 @@ class ServiceProductList {
         .json({ error: "An error occurred while approving the product." });
     }
   }
+
+  // async getProductservicelist(req, res) {
+  //   try {
+  //     let service = await ServiceProductListModal.find({});
+  //     if (service) {
+  //       console.log("service", service);
+  //       return res.json({ service: service });
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
 
   async serviceDisapprove(req, res) {
     try {

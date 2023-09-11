@@ -2,7 +2,6 @@ import { NotificationManager } from "react-notifications";
 
 export default function createNotification(type, msg, timeout = 3000) {
   return () => {
-    // eslint-disable-next-line default-case
     switch (type) {
       case "info":
         NotificationManager.info(msg, timeout);

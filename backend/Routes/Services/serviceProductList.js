@@ -34,11 +34,15 @@ router.post(
   upload.single("serviceProductImage"),
   ServiceProductListController.updateService
 );
-router.get("/getserviceswithusersdetails");
-ServiceProductListController.getServiceWithUserDetails;
+router.get(
+  "/getserviceswithusersdetails",
+  ServiceProductListController.getServiceWithUserDetails
+);
 
-router.get("/getservicelist");
-ServiceProductListController.getProductservicelist;
+router.get(
+  "/getserviceallcatagory",
+  ServiceProductListController.getProductservicelist
+);
 
 router.put(
   "/serviceapprove/:serviceId",

@@ -1,44 +1,25 @@
-import React, { useEffect, useState } from "react";
-import Header from "./layout/Header";
-import Sidenav from "../Sidenav";
-// import Button from "react-bootstrap/Button";
-// import Modal from "react-bootstrap/Modal";
-// import DataTable from "react-data-table-component";
+import React, { useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/layout/Sidebar";
 
-import { useParams, Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Vendorprofile() {
-  const apiURL = process.env.REACT_APP_API_URL;
-  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
-  const [data, setdata] = useState([]);
-  const { id } = useParams();
+  const [limitProducts, setLimitProducts] = useState("");
+  const [showTransactions, setShowTransactions] = useState(false);
 
-  useEffect(() => {
-    getvendor();
-  }, []);
+  const location = useLocation();
+  const { item } = location.state || {};
 
-  const getvendor = async () => {
-    let res = await axios.get(apiURL+"/vendor/getalluser");
-    if ((res.status = 200)) {
-      setdata(res.data.vendorprofile);
-    } else {
-      console.log("error");
-    }
-  };
-
-  const a = data?.filter((a) => a._id === id);
-
-  const item = a[0];
+  console.log("Vendor Data:", item);
 
   const Approve = async (e) => {
     e.preventDefault();
     try {
       const config = {
-        url: `/vendor/approvevendor/${item._id}`,
+        url: `/approvevendor/${item._id}`,
         method: "post",
-        baseURL: apiURL,
+        baseURL: "http://api.infinitimart.in/api/vendor",
         headers: { "content-type": "application/json" },
         data: {
           vendorstatus: "approved",
@@ -46,7 +27,6 @@ function Vendorprofile() {
       };
       await axios(config).then(function (response) {
         if (response.status === 200) {
-          // alert("Vendor registration has been successfully approved");
           window.location.reload("");
         }
       });
@@ -60,9 +40,9 @@ function Vendorprofile() {
     e.preventDefault();
     try {
       const config = {
-        url: `vendor/disapprovevendor/${item._id}`,
+        url: `/disapprovevendor/${item._id}`,
         method: "post",
-        baseURL: apiURL,
+        baseURL: "http://api.infinitimart.in/api/vendor",
         headers: { "content-type": "application/json" },
         data: {
           vendorstatus: "disapproved", // Change the vendorstatus to "disapproved"
@@ -80,7 +60,61 @@ function Vendorprofile() {
     }
   };
 
-  console.log(item);
+  const productLimits = async (e) => {
+    e.preventDefault();
+    try {
+      const config = {
+        url: `/productslimits/${item._id}`,
+        method: "put",
+        baseURL: "http://api.infinitimart.in/api/vendor",
+        headers: { "content-type": "application/json" },
+        data: {
+          ProductLimits: limitProducts,
+        },
+      };
+      await axios(config).then(function (response) {
+        if (response.status === 200) {
+          alert(response.data.Success);
+          window.location.reload("");
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      // alert(error.);
+    }
+  };
+
+  console.log(item.PaymentDetails);
+
+  const checkPaymentsLength = () => {
+    if (!item || !item.PaymentDetails || item.PaymentDetails.length === 0) {
+      return 0;
+    } else {
+      const sortedPayments = item.PaymentDetails.sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+
+      const mostRecentSuccessPayment = sortedPayments.filter(
+        (payment) => payment.code === "PAYMENT_SUCCESS"
+      );
+      if (mostRecentSuccessPayment.length > 0) {
+        console.log("mostRecentSuccessPayment", mostRecentSuccessPayment);
+        return mostRecentSuccessPayment[0].data.amount;
+      } else {
+        console.log("item", item);
+        return 0;
+      }
+    }
+  };
+
+  // const ViewInvoice = (e) => {
+  //   setInvoice(e);
+
+  // };
+
+  const returnAmount = checkPaymentsLength();
+  console.log("returnAmount", returnAmount);
+
   return (
     <div className="row me-0">
       <div className="col-md-2">
@@ -92,13 +126,13 @@ function Vendorprofile() {
             <b>Vendor Profile</b>
           </h5>
           <hr />
-          {/* <div className="d-flex">
-            <div>
+          <div className="d-flex">
+            {/* <div>
               <img
-                src={`http://localhost:8000/documents/${item.selfie}`}
+                src={`http://api.infinitimart.in/documents/${item?.selfie}`}
                 className="vendorprofile"
               />
-            </div>
+            </div> */}
             <div className="mx-4">
               <div>
                 <p>{item?.firstname}</p>
@@ -108,12 +142,40 @@ function Vendorprofile() {
                 <b>{item?.phoneNumber}</b>
               </p>
             </div>
-          </div> */}
+            <div>
+              <span>
+                <b>Products Limited</b>{" "}
+              </span>{" "}
+              :{" "}
+              <span>
+                <input
+                  type="number"
+                  min={1}
+                  style={{ width: "35%" }}
+                  placeholder="Min 1"
+                  onChange={(e) => setLimitProducts(e.target.value)}
+                />{" "}
+              </span>
+              <span>
+                <button
+                  style={{
+                    border: "none",
+                    backgroundColor: "#afffca",
+                    borderRadius: "3px",
+                    padding: "3px 12px",
+                  }}
+                  onClick={productLimits}
+                >
+                  Add
+                </button>
+              </span>
+            </div>
+          </div>
           <div className="row me-0">
             <div className="col-md-4">
               <div style={{ display: "flex", alignItems: "center" }}>
                 <img
-                  src={imgURL+`/documents/${item?.selfie}`}
+                  src={`http://api.infinitimart.in/documents/${item?.selfie}`}
                   className="vendorprofile"
                   alt=""
                   style={{ width: "25%", borderRadius: "100%" }}
@@ -251,6 +313,17 @@ function Vendorprofile() {
                     </span>
                   </div>
                 </div>
+                <div className="row p-2">
+                  <div className="col-4">
+                    <b>Product Limits</b>
+                  </div>
+                  <div className="col-1">:</div>
+                  <div className="col-5">
+                    <span style={{ fontWeight: "600" }}>
+                      {item?.ProductLimits ? item?.ProductLimits : "0"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -258,6 +331,42 @@ function Vendorprofile() {
             className="d-flex p-5"
             style={{ justifyContent: "space-evenly" }}
           >
+            <div>
+              <Link
+                to="/invoice" // Adjust the path based on your route setup
+                state={{ invoiceData: item }} // Pass the invoice data as a parameter
+              >
+                <button
+                  disabled={item.PaymentDetails.length === 0}
+                  style={{
+                    backgroundColor: "rgb(112 112 112)",
+                    border: 0,
+                    borderRadius: "10px",
+                    color: "white",
+                    padding: "4px 15px",
+                    fontWeight: "700",
+                  }}
+                >
+                  View Invoice
+                </button>
+              </Link>
+            </div>
+            <div>
+              <button
+                // disabled={item?.vendorstatus === "approved"}
+                style={{
+                  backgroundColor: "rgb(36 150 255)",
+                  border: 0,
+                  borderRadius: "10px",
+                  color: "white",
+                  padding: "4px 15px",
+                  fontWeight: "700",
+                }}
+                onClick={() => setShowTransactions(true)}
+              >
+                View Payments
+              </button>
+            </div>
             <div>
               {item?.vendorstatus === "approved" ? (
                 <p style={{ color: "#01ad3d" }}>Approved</p>
@@ -313,6 +422,71 @@ function Vendorprofile() {
               </button>
             </div>
           </div>
+          {/* {object.keys(item).length > 0 (
+            <> */}
+          {showTransactions && item.PaymentDetails.length !== 0 ? (
+            <div className="pb-5">
+              <div className="vendor-payment-details">
+                <div className="svg-container">
+                  <p
+                    className="transaction-id"
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      color: "#0044ff",
+                      display: "flex",
+                      fontSize: "12px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Transaction ID:{" "}
+                    {item.PaymentDetails[0]?.data?.transactionId}
+                  </p>
+                  <p className="total-paid" style={{ color: "#9da1ac" }}>
+                    <b>TOTAL PAID</b>
+                  </p>
+                  <h4
+                    className="amount"
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "55px",
+                      color: "#444c66",
+                    }}
+                  >
+                    ₹ {checkPaymentsLength()}.00{" "}
+                  </h4>
+                  {/* <h4>
+                    {item.PaymentDetails[0]?.length > 0
+                      ? item.PaymentDetails.filter(
+                          (detail) => detail.code === "PAYMENT_SUCCESS"
+                        )
+                          .sort(
+                            (a, b) =>
+                              new Date(b.createdAt) - new Date(a.createdAt)
+                          )
+                          .map((successDetail, index) => (
+                            <div key={index}>{successDetail.data.amount}</div>
+                          ))
+                      : null}
+                  </h4> */}
+
+                  <div className="created-at">
+                    {item.PaymentDetails[0]?.createdAt}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {showTransactions && item.PaymentDetails.length === 0 ? (
+                <div className="pb-5">No Payment History</div>
+              ) : (
+                ""
+              )}
+            </>
+          )}
+          {/* </>
+          ):""} */}
         </div>
       </div>
     </div>

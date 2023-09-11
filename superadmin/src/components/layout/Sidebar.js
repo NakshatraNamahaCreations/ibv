@@ -20,7 +20,7 @@ const Sidebar = ({ children }) => {
       name: "Dashboard",
     },
     {
-      path: "/banner",
+      path: "/productbanner",
       name: "Banner",
     },
     {
@@ -33,34 +33,34 @@ const Sidebar = ({ children }) => {
     },
     {
       path: "/category",
-      name: "Category",
-    },
-
-    {
-      path: "/Subcategory",
-      name: "Subcategory",
+      name: "Product",
     },
 
     {
       path: "/servicecategory",
-      name: "Service Category",
+      name: "Service",
     },
-    {
-      path: "/servicesubcategory",
-      name: "Service Subcategory",
-    },
-    {
-      path: "/sales",
-      name: "Sales",
-    },
+
+    // {
+    //   path: "/updatevendor",
+    //   name: "Vendor Approve ",
+    // },
+    // {
+    //   path: "/servicesubcategory",
+    //   name: "Service Subcategory",
+    // },
+    // {
+    //   path: "/sales",
+    //   name: "Sales",
+    // },
     {
       path: "/review",
       name: "Review Management",
     },
-    {
-      path: "/Wallets",
-      name: "Wallets",
-    },
+    // {
+    //   path: "/Wallets",
+    //   name: "Wallets",
+    // },
     {
       path: "/settings",
       name: "Settings",

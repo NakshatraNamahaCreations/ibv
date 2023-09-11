@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Form } from "react-bootstrap";
+import InputRange from "react-input-range";
 
-function EditProducts() {
+function EditProducts(props) {
   const user = JSON.parse(sessionStorage.getItem("vendor"));
-  const apiURL = process.env.REACT_APP_API_URL;
-  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
+  const productObj = props.productData;
+  console.log("productData", productObj);
   const [category, setcategory] = useState("");
   const [subcatagory, setSubcatagory] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState("");
   const [subcatagorydata, setSubCatagorydata] = useState([]);
-  const [productData, setProductData] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [showPriceDetail, setShowPriceDetails] = useState(false);
   const [changeProductName, setChangeProductName] = useState("");
   const [changeProductBrand, setChangeProductBrand] = useState("");
   const [changeProductImage, setChangeProductImage] = useState("");
-  const [changeProductSize, setChangeProductSize] = useState("");
-  const [changeProductQuantity, setChangeProductQuantity] = useState("");
   const [changeProductPrice, setChangeProductPrice] = useState("");
   const [changeProductDescription, setChangeProductDescription] = useState("");
+  const [minValue, setMinValue] = useState(1);
+  const [maxValue, setMaxValue] = useState(100000);
 
   useEffect(() => {
     getSubcategoriesByCategory();
@@ -26,31 +25,14 @@ function EditProducts() {
   const getSubcategoriesByCategory = async () => {
     try {
       let res = await axios.post(
-        apiURL+`/vendor/product/subcatagory/postsubcatagory/`,
+        `http://api.infinitimart.in/api/vendor/product/subcatagory/postsubcatagory/`,
         {
           catagoryName: category,
         }
       );
       if (res.status === 200) {
-        console.log("subcatagory", res);
-        setSubCatagorydata(res.data?.subcatagory);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  useEffect(() => {
-    getProductBySubcatagory();
-  }, [subcatagory]);
-  const getProductBySubcatagory = async () => {
-    try {
-      const res = await axios.post(
-        apiURL+`/product/productsBySubcategory`,
-        { SubcatagoryName: subcatagory } // Pass the subcategory ID as the request payload
-      );
-      if (res.status === 200) {
-        console.log("Product", res);
-        setProductData(res.data?.product);
+        // console.log("subcatagory", res);
+        setSubCatagorydata(res.data?.success);
       }
     } catch (error) {
       console.error(error);
@@ -64,7 +46,7 @@ function EditProducts() {
   };
 
   const updateProduct = async (e) => {
-    const productId = selectedProduct;
+    const productId = productObj._id;
     const formdata = new FormData();
     e.preventDefault();
     formdata.append("userId", user._id);
@@ -73,16 +55,14 @@ function EditProducts() {
     formdata.append("productName", changeProductName);
     formdata.append("productPrice", changeProductPrice);
     formdata.append("productBrand", changeProductBrand);
-    formdata.append("productSize", changeProductSize);
     formdata.append("productImage", changeProductImage);
-    formdata.append("productQuantity", changeProductQuantity);
     formdata.append("productDescription", changeProductDescription);
-    formdata.append("productStatus", "Active");
+    formdata.append("productRange", minValue && minValue);
     try {
       const config = {
         url: `/product/updateproduct/${productId}`,
         method: "post",
-        baseURL: apiURL,
+        baseURL: "http://api.infinitimart.in/api",
         data: formdata,
       };
       await axios(config).then(function (res) {
@@ -98,223 +78,212 @@ function EditProducts() {
     }
   };
 
+  const handleMinInputChange = (e) => {
+    const newMinValue = parseInt(e.target.value, 10);
+    if (newMinValue < 1) {
+      setMinValue(1);
+    } else if (newMinValue > maxValue) {
+      setMinValue(maxValue);
+    } else {
+      setMinValue(newMinValue);
+    }
+  };
+
+  const handleMaxInputChange = (e) => {
+    const newMaxValue = parseInt(e.target.value, 10);
+    if (newMaxValue > 100000) {
+      setMaxValue(100000);
+    } else if (newMaxValue < minValue) {
+      setMaxValue(minValue);
+    } else {
+      setMaxValue(newMaxValue);
+    }
+  };
+
   return (
     <div>
       <div>
-        <a href="/contentmanagement">
+        <a href="/Products">
           <i class="fa-solid fa-angles-left"></i> Go Back
         </a>
       </div>
       <br />
       <div>
-        <h3>Edit Products</h3>
+        <h3>Edit Product</h3>
       </div>
-      <div className="d-flex" style={{ justifyContent: "space-around" }}>
-        <div>
-          <label>Choose Catagory:</label>{" "}
-          <select
-            className="edit-pro-select"
-            onChange={(e) => setcategory(e.target.value)}
-          >
-            <option value="">Select</option>
-            <option key={user.category} value={user.category}>
-              {user.category}{" "}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label>Choose SubCatagory:</label>{" "}
-          <select
-            className="edit-pro-select"
-            onChange={(e) => setSubcatagory(e.target.value)}
-          >
-            <option value="">Select</option>
-            {subcatagorydata?.map((subcatagory) => (
-              <option
-                key={subcatagory.SubcatagoryName}
-                value={subcatagory.SubcatagoryName}
-              >
-                {subcatagory.SubcatagoryName}{" "}
+      <div className="row">
+        <div className="col-md-6">
+          <div>
+            <label className="pb-2 edit-lable">Choose Catagory:</label> <br />
+            <select
+              className="edit-pro-select"
+              onChange={(e) => setcategory(e.target.value)}
+            >
+              <option value="">Select</option>
+              <option key={user.category} value={user.category}>
+                {user.category}{" "}
               </option>
-            ))}
-          </select>
+            </select>
+          </div>
+          <br />
+          <br />
+          <div>
+            <label className="pb-2 edit-lable">Product Name</label>
+            <br />
+            <input
+              className="edit-input"
+              defaultValue={
+                productObj.productName
+                  ? productObj?.productName
+                  : "Enter Product Name"
+              }
+              onChange={(e) => setChangeProductName(e.target.value)}
+            />
+          </div>
+          <br />{" "}
+          <div>
+            <label className="pb-2 edit-lable">Product Price</label>
+            <br />
+            <input
+              className="edit-input"
+              defaultValue={
+                productObj.productPrice ? productObj.productPrice : ""
+              }
+              onChange={(e) => setChangeProductPrice(e.target.value)}
+            />
+          </div>
+          <br />
+          <div>
+            <label className="pb-2 edit-lable">Brand</label>
+            <br />
+            <input
+              className="edit-input"
+              defaultValue={
+                productObj.productBrand
+                  ? productObj.productBrand
+                  : "Enter Brand Name"
+              }
+              onChange={(e) => setChangeProductBrand(e.target.value)}
+            />
+          </div>
+          <br />
+          <div>
+            <label className="pb-2 edit-lable">Description</label>
+            <br />
+            <textarea
+              className="edit-textarea"
+              defaultValue={
+                productObj.productDescription
+                  ? productObj.productDescription
+                  : "Enter Descriptions"
+              }
+              onChange={(e) => setChangeProductDescription(e.target.value)}
+            />
+          </div>
         </div>
-        <div>
-          <label>Select Product:</label>{" "}
-          <select
-            className="edit-pro-select"
-            value={selectedProduct}
-            onChange={(e) => setSelectedProduct(e.target.value)}
-          >
-            <option value="">Select</option>
-            {productData?.map((product) => (
-              <option key={product._id} value={product._id}>
-                {product.productName}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <br />
-      <hr />
-      {selectedProduct ? (
-        <>
-          <div className="row">
-            <div className="col-md-6">
+        <div className="col-md-6">
+          <div>
+            <label className="pb-2 edit-lable">Choose SubCatagory:</label>{" "}
+            <br />
+            <select
+              className="edit-pro-select"
+              onChange={(e) => setSubcatagory(e.target.value)}
+            >
+              <option value="">Select</option>
+              {subcatagorydata?.map((subcatagory) => (
+                <option
+                  key={subcatagory.SubcatagoryName}
+                  value={subcatagory.SubcatagoryName}
+                >
+                  {subcatagory.SubcatagoryName}{" "}
+                </option>
+              ))}
+            </select>
+          </div>
+          <br />
+          <div className="d-flex" style={{ justifyContent: "space-around" }}>
+            <div>
+              <label className="pb-2 edit-lable">Product Image</label>
               <br />
-              <div>
-                <label className="pb-2 edit-lable">Product Name</label>
-                <br />
-                <input
-                  className="edit-input"
-                  defaultValue={
-                    productData.find(
-                      (product) => product._id === selectedProduct
-                    )?.productName || ""
-                  }
-                  onChange={(e) => setChangeProductName(e.target.value)}
+              {selectedImage && (
+                <img
+                  className="edit-product-image"
+                  src={selectedImage}
+                  alt="Uploaded"
+                  onChange={(e) => setChangeProductImage(e.target.files[0])}
                 />
-              </div>
-              <br />
-              <div>
-                <label className="pb-2 edit-lable">Brand</label>
-                <br />
-                <input
-                  className="edit-input"
-                  defaultValue={
-                    productData.find(
-                      (product) => product._id === selectedProduct
-                    )?.productBrand || "Enter Brand Name"
-                  }
-                  onChange={(e) => setChangeProductBrand(e.target.value)}
+              )}
+              {!selectedImage && (
+                <img
+                  src={`http://api.infinitimart.in/productlist/${
+                    productObj.productImage ? productObj.productImage : ""
+                  }`}
+                  className="edit-product-image"
+                  alt=""
                 />
-              </div>
-              <br />
-              <div>
-                <label className="pb-2 edit-lable">Description</label>
-                <br />
-                <textarea
-                  className="edit-textarea"
-                  defaultValue={
-                    productData.find(
-                      (product) => product._id === selectedProduct
-                    )?.productDescription || ""
-                  }
-                  onChange={(e) => setChangeProductDescription(e.target.value)}
-                />
-              </div>
+              )}
             </div>
-            <div className="col-md-6">
-              <div
-                className="d-flex"
-                style={{ justifyContent: "space-around" }}
-              >
+            <div className="ms-2 ">
+              <label className="pb-2 edit-lable">Upload Product Image</label>
+              <input type="file" onChange={handleImageChange} />
+            </div>
+          </div>
+          <br />
+          <div className="d-flex" style={{ justifyContent: "space-between" }}>
+            <Form.Group controlId="formGridZip" className="product-grid">
+              <Form.Label className="mb-3">Service Range</Form.Label>
+              <div className="d-flex mb-4 ">
                 <div>
-                  <label className="pb-2 edit-lable">Product Image</label>
-                  <br />
-                  {selectedImage && (
-                    <img
-                      className="edit-product-image"
-                      src={selectedImage}
-                      alt="Uploaded"
-                      onChange={(e) => setChangeProductImage(e.target.files[0])}
-                    />
-                  )}
-                  {!selectedImage && (
-                    <img
-                      src={imgURL+`/productlist/${
-                        productData.find(
-                          (product) => product._id === selectedProduct
-                        )?.productImage || ""
-                      }`}
-                      className="edit-product-image"
-                      alt=""
-                    />
-                  )}
-                </div>
-                <div className="ms-2 ">
-                  <label className="pb-2 edit-lable">
-                    Upload Product Image
-                  </label>
-                  <input type="file" onChange={handleImageChange} />
-                </div>
-              </div>
-              <br />
-              <div
-                className="d-flex"
-                style={{ justifyContent: "space-between" }}
-              >
-                <div>
-                  <label className="pb-2 edit-lable">Size</label>
-                  <br />
+                  <label
+                    style={{
+                      color: "#a9042e",
+                      fontSize: "11px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Min Value:
+                  </label>{" "}
                   <input
-                    className="edit-input"
-                    defaultValue={
-                      productData.find(
-                        (product) => product._id === selectedProduct
-                      )?.productSize || ""
-                    }
-                    style={{ width: "100%" }}
-                    onChange={(e) => setChangeProductSize(e.target.value)}
+                    type="number"
+                    placeholder="1"
+                    style={{ width: "50%" }}
+                    value={minValue}
+                    onChange={handleMinInputChange}
                   />
                 </div>
-                <div className="mt-4">
-                  <label className="pb-2 edit-lable">Add Price Range</label> :{" "}
-                  <span>
-                    <i
-                      class="fa-solid fa-circle-plus"
-                      style={{ cursor: "pointer" }}
-                      onClick={() => setShowPriceDetails(!showPriceDetail)}
-                    ></i>
-                  </span>
-                </div>
-                <div></div>
-              </div>
-              <br />
-              {showPriceDetail ? (
-                <>
-                  <div
-                    className="d-flex"
-                    style={{ justifyContent: "space-between" }}
+                <div>
+                  <label
+                    style={{
+                      color: "#a9042e",
+                      fontSize: "11px",
+                      fontWeight: 500,
+                    }}
                   >
-                    <div>
-                      <label className="pb-2 edit-lable">Product Range</label>
-                      <br />
-                      <select
-                        style={{ width: "100%" }}
-                        onChange={(e) =>
-                          setChangeProductQuantity(e.target.value)
-                        }
-                      >
-                        <option>Select</option>
-                        <option value="1-1000">1-1000 </option>
-                        <option value="1k-10k">1k-10k</option>
-                        <option value="10k-1Lakhs">10k-1Lakhs</option>
-                        <option value="Above">Above</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="pb-2 edit-lable">Product Price</label>
-                      <br />
-                      <input
-                        className="edit-input"
-                        placeholder="Enter Price Range"
-                        style={{ width: "100%" }}
-                        onChange={(e) => setChangeProductPrice(e.target.value)}
-                        defaultValue={
-                          productData.find(
-                            (product) => product._id === selectedProduct
-                          )?.productPrice || ""
-                        }
-                      />
-                    </div>
-                    <div></div>
-                  </div>
-                </>
-              ) : (
-                ""
-              )}
-              {/* <div>
+                    Max Value:
+                  </label>{" "}
+                  <input
+                    type="number"
+                    placeholder="100000"
+                    style={{ width: "50%" }}
+                    value={maxValue}
+                    onChange={handleMaxInputChange}
+                  />
+                </div>
+              </div>
+              <InputRange
+                maxValue={100000}
+                minValue={1}
+                value={{ min: minValue, max: maxValue }}
+                onChange={(newRange) => {
+                  setMinValue(newRange.min);
+                  setMaxValue(newRange.max);
+                }}
+              />
+            </Form.Group>
+            <div></div>
+          </div>
+          <br />
+          {/* <div>
                 <label className="pb-2 edit-lable">
                   Price (INR): {price}
                   .00{" "}
@@ -335,16 +304,13 @@ function EditProducts() {
                   }
                 />
               </div> */}
-              <br />
-              <button className="save-prod-search-btn" onClick={updateProduct}>
-                UPDATE
-              </button>
-            </div>
-          </div>
-        </>
-      ) : (
-        <p style={{ textAlign: "center", color: "maroon" }}>Search product</p>
-      )}
+          <br />
+          <button className="save-prod-search-btn" onClick={updateProduct}>
+            UPDATE
+          </button>
+          <br /> <br />
+        </div>
+      </div>
     </div>
   );
 }

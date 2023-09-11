@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 function EditProducts() {
-  const apiURL = process.env.REACT_APP_API_URL;
-  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [catagorydata, setCatagorydata] = useState([]);
   const [selectedCatagoryId, setSelectedCatagoryId] = useState(null);
   const [subcatagorydata, setSubCatagorydata] = useState([]);
@@ -20,7 +18,7 @@ function EditProducts() {
   const getAllCatagory = async () => {
     try {
       const res = await axios.get(
-        apiURL+"/vendor/product/catagory/getcatagory"
+        "http://api.infinitimart.in/api/vendor/product/catagory/getcatagory"
       );
       if (res.status === 200) {
         console.log("catagory===", res);
@@ -35,7 +33,7 @@ function EditProducts() {
   }, []);
 
   const getAllProduct = async () => {
-    let res = await axios.get(apiURL+"/product/getproduct");
+    let res = await axios.get("http://api.infinitimart.in/api/product/getproduct");
     if (res.status === 200) {
       console.log("productList===", res);
       setproductData(res.data?.productData);
@@ -45,7 +43,7 @@ function EditProducts() {
   const getAllSubCatagory = async (categoryId) => {
     try {
       let res = await axios.get(
-        apiURL+`/vendor/product/subcatagory/getSubcategoriesByCategory/${categoryId}`
+        `http://api.infinitimart.in/api/vendor/product/subcatagory/getSubcategoriesByCategory/${categoryId}`
       );
       if (res.status === 200) {
         console.log("subcatagory===", res);

@@ -8,6 +8,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Toggl_provider from "./Component/Toggl_provider";
 import "react-notifications/lib/notifications.css";
 import { NotificationContainer } from "react-notifications";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -15,6 +17,7 @@ root.render(
     <Toggl_provider>
       <App />
       <NotificationContainer />
+      <ToastContainer />
     </Toggl_provider>
   </React.StrictMode>
 );

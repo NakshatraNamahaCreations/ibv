@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "./layout/Header";
 import Sidenav from "../Sidenav";
 import Button from "react-bootstrap/Button";
@@ -15,10 +15,15 @@ import {
   MDBTableBody,
   MDBCheckbox,
 } from "mdb-react-ui-kit";
+import axios from "axios";
+import DataTable from "react-data-table-component";
 
 function Buyer() {
+  const [buyerData, setBuyerData] = useState([]);
   const [show, setShow] = useState(false);
   const [selected, setSelected] = useState(false);
+  const [name, setName] = useState("");
+  const [filterdata, setfilterdata] = useState([]);
   const handleactive1 = () => {
     setSelected(true);
   };
@@ -39,6 +44,53 @@ function Buyer() {
     setToggel(false);
   };
 
+  const getAllBuyres = async () => {
+    try {
+      let res = await axios.get("http://api.infinitimart.in/api/buyer/getalluser");
+      if (res.status === 200) {
+        const buyerDetails = res.data?.buyerProfile;
+        setBuyerData(buyerDetails);
+        setfilterdata(buyerDetails);
+        console.log("vendorPaymentsData", buyerDetails);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getAllBuyres();
+  }, []);
+
+  const columns = [
+    {
+      name: "Sl  No",
+      selector: (row, index) => index + 1,
+    },
+    {
+      name: "Customer Name",
+      selector: (row) => row.name,
+    },
+    {
+      name: "Email",
+      selector: (row) => row.email,
+    },
+  ];
+
+  useEffect(() => {
+    const searchResults = () => {
+      let results = buyerData;
+      if (name) {
+        results = results.filter(
+          (item) =>
+            item.name && item.name.toLowerCase().includes(name.toLowerCase())
+        );
+      }
+      setfilterdata(results);
+    };
+    searchResults();
+  }, [name]);
+
   return (
     <div div className="row me-0">
       <div className="col-md-2">
@@ -47,7 +99,7 @@ function Buyer() {
       <div className="col-md-10">
         {toggle ? (
           <div>
-            <div className="mt-4 p-2">
+            <div className="mt-4 p-2 ">
               <h4>Buyer Management</h4>
             </div>
             <div
@@ -60,9 +112,9 @@ function Buyer() {
               <div>
                 <Form.Control
                   type="search"
-                  placeholder="Search"
+                  placeholder="Search by Name"
                   className="me-2"
-                  aria-label="Search.."
+                  onChange={(e) => setName(e.target.value)}
                   // style={{ width: "25%" }}
                 />
                 {/* <i
@@ -70,70 +122,19 @@ function Buyer() {
                   style={{ position: "relative", left: "90%", bottom: "45%" }}
                 ></i> */}
               </div>
-              <div className="">
-                <Button
-                  type="button"
-                  // variant="danger"
-                  className="btn btn-secondary float-end"
-                  onClick={handelAddbtn}
-                  style={{ backgroundColor: "#a9042e", border: "none" }}
-                >
-                  <i class="fa-regular fa-plus"></i>
-                  Add Buyer
-                </Button>
-              </div>
             </div>
 
-            <div>
-              <MDBTable align="middle" className="mt-1 p-2">
-                <MDBTableHead light>
-                  <tr style={{ textAlign: "center" }}>
-                    <th>SI No.</th>
-                    <th scope="col">Customer Name</th>
-                    <th scope="col">Contact No.</th>
-                    <th scope="col">Business Name</th>
-                    <th scope="col">category</th>
-                    <th scope="col">Place of business</th>
-                    <th scope="col">Image</th>
-                    <th scope="col">Registration date</th>
-                    <th scope="col">City</th>
-                    <th scope="col">State</th>
-                    <th scope="col">Action</th>
-                  </tr>
-                </MDBTableHead>
-                <MDBTableBody>
-                  <tr style={{ textAlign: "center" }}>
-                    <td>2</td>
-                    <td>Ajay</td>
-                    <td>7438293829</td>
-                    <td>Corporation</td>
-                    <td>Realestate</td>
-                    <td>Banshankari</td>
-                    <td>
-                      <img
-                        src="https://smallbiztrends.com/ezoimgfmt/media.smallbiztrends.com/2022/05/real-estate-business-ideas-850x476.png?ezimgfmt=ng%3Awebp%2Fngcb12%2Frs%3Adevice%2Frscb12-1"
-                        width={"60px"}
-                        height={"60px"}
-                      />
-                    </td>
-                    <td>Bengluru</td> <td>karnataka</td>
-                    <td>03-07-2023</td>
-                    <td>
-                      <i
-                        title="Edit"
-                        class="fa-solid fa-pen"
-                        style={{ color: "rgb(255,192,7)", cursor: "pointer" }}
-                      ></i>{" "}
-                      |{" "}
-                      <i
-                        title="Delete"
-                        class="fa-solid fa-trash"
-                        style={{ color: "#a9042e", cursor: "pointer" }}
-                      ></i>
-                    </td>
-                  </tr>
-                </MDBTableBody>
-              </MDBTable>
+            <div className="mt-3">
+              <DataTable
+                columns={columns}
+                data={filterdata}
+                // data={filterdata}
+                pagination
+                fixedHeader
+                selectableRowsHighlight
+                subHeaderAlign="left"
+                highlightOnHover
+              />
             </div>
           </div>
         ) : (

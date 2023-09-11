@@ -19,6 +19,7 @@ import ContentManagement from "./Component/ContentManagement";
 import EditProducts from "./Component/EditProducts";
 import Header from "./Component/Header";
 import EditServices from "./Component/EditServices";
+import SettingsCopy from "./Component/SettingsCopy";
 
 function App() {
   return (
@@ -162,6 +163,18 @@ function App() {
               children={
                 <>
                   <EditServices />
+                </>
+              }
+            />
+          }
+        />
+        <Route
+          path="/SettingsCopy"
+          element={
+            <Layout
+              children={
+                <>
+                  <SettingsCopy />
                 </>
               }
             />

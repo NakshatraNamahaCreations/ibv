@@ -3,20 +3,27 @@ import { Menu, MenuItem, ProSidebar, SubMenu } from "react-pro-sidebar";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 // import createNotification from "./NotificationContainer";
 
 function Sidebar() {
-  const apiURL = process.env.REACT_APP_API_URL;
-  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const user = JSON.parse(sessionStorage.getItem("vendor"));
   const signout = () => {
     try {
       axios
-        .get(apiURL+`/vendor/signout/` + user._id)
+        .get(`http://api.infinitimart.in/api/vendor/signout/` + user._id)
         .then(function (res) {
           if (res.status === 200) {
-            alert("Signout Success!");
+            // alert("Signout Success!");
             // createNotification("success", "Login Success");
+            toast.success("Logout Done", {
+              position: toast.POSITION.TOP_RIGHT,
+              autoClose: 6000, // milliseconds
+              hideProgressBar: true,
+              closeOnClick: true,
+              draggable: true,
+              theme: "colored",
+            });
             sessionStorage.removeItem("vendor");
             window.location.assign("/");
             return;
@@ -110,9 +117,9 @@ function Sidebar() {
                 </>
               )}
             </MenuItem>
-            <MenuItem>
+            {/* <MenuItem>
               Content Management <Link to="/contentmanagement" />
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem>
               Ads <Link to="/ads" />
             </MenuItem>

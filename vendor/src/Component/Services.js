@@ -5,6 +5,10 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
+import InputRange from "react-input-range";
+import "react-input-range/lib/css/index.css";
+import DataTable from "react-data-table-component";
+import EditServices from "./EditServices";
 
 const active = {
   backgroundColor: "rgb(169, 4, 46)",
@@ -14,11 +18,8 @@ const active = {
 };
 const inactive = { color: "black", backgroundColor: "white" };
 function Services() {
-  const apiURL = process.env.REACT_APP_API_URL;
-  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const user = JSON.parse(sessionStorage.getItem("vendor"));
   const [data, setData] = useState({});
-  const [storeData, setStoreData] = useState([]);
   const [selected, setSelected] = useState(0);
   const handleClick = (divNum) => () => {
     setSelected(divNum);
@@ -30,38 +31,22 @@ function Services() {
   const [ProductName, setProductName] = useState("");
   const [ProductPrice, setProductPrice] = useState("");
   const [Brand, setBrand] = useState("");
-  const [Size, setSize] = useState("");
   const [Image, setImage] = useState("");
-  const [Discount, setDiscount] = useState("");
-  const [Volume, setVolume] = useState("");
+  const [productRange, setProductRange] = useState({ min: 1, max: 100000 });
   const [Description, setDescription] = useState("");
-
-  const [catagorydata, setCatagorydata] = useState([]);
+  const [minValue, setMinValue] = useState(1);
+  const [maxValue, setMaxValue] = useState(100000);
   const [subcatagorydata, setSubcatagorydata] = useState([]);
 
-  //pagination
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 10; // Number of items to display per page
-  const pageCount = Math.ceil(productData.length / itemsPerPage);
-  const offset = currentPage * itemsPerPage;
-  const currentPageData = productData.slice(offset, offset + itemsPerPage);
+  // edit service
+  const [EditService, setEditService] = useState({});
+  const [showEdit, setShowEdit] = useState(false);
 
-  // Handle page change
-  const handlePageChange = ({ selected }) => {
-    setCurrentPage(selected);
-  };
+  const handleEdit = (editService) => {
+    console.log("service", editService.serviceProductName);
 
-  const handleData = (e) => {
-    const { name, value } = e.target;
-    setData((previousData) => ({
-      ...previousData,
-      [name]: value,
-    }));
-  };
-
-  const hadleSave = () => {
-    setStoreData([...storeData, data]);
-    setData("");
+    setEditService(editService);
+    setShowEdit(true);
   };
 
   useEffect(() => {
@@ -70,7 +55,7 @@ function Services() {
 
   const getServiceProductListByUserId = async () => {
     let res = await axios.post(
-      apiURL+`/vendor/services/productlist/serviceproductbyuserid/`,
+      `http://api.infinitimart.in/api/vendor/services/productlist/serviceproductbyuserid/`,
       { userId: user._id }
     );
     if (res.status === 200) {
@@ -86,14 +71,14 @@ function Services() {
   const getSubcategoriesByCategory = async () => {
     try {
       let res = await axios.post(
-        apiURL+`/vendor/services/subcatagory/postsubcatagoryservicesbycatagory/`,
+        `http://api.infinitimart.in/api/vendor/services/subcatagory/postsubcatagoryservices/`,
         {
           catagoryName: catagory,
         }
       );
       if (res.status === 200) {
-        console.log("subcatagoryservices--", res);
-        setSubcatagorydata(res.data?.subcatagory);
+        // console.log("subcatagoryservices--", res);
+        setSubcatagorydata(res.data?.success);
       }
     } catch (error) {
       console.error(error);
@@ -108,24 +93,21 @@ function Services() {
     formdata.append("serviceSubcatagoryName", subcatagory);
     formdata.append("serviceProductName", ProductName);
     formdata.append("serviceProductPrice", ProductPrice);
+    formdata.append("serviceProductRange", minValue && minValue);
     formdata.append("serviceProductImage", Image);
     formdata.append("serviceProductDescription", Description);
-    formdata.append("serviceProductQuantity", Volume);
-    formdata.append("serviceProductStatus", "Active");
     formdata.append("serviceProductBrand", Brand);
-    formdata.append("serviceProductSize", Size);
-    formdata.append("serviceProductDiscount", Discount);
     try {
       const config = {
         url: "/vendor/services/productlist/addserviceproducts",
         method: "post",
-        baseURL: apiURL,
+        baseURL: "http://api.infinitimart.in/api",
         data: formdata,
       };
       await axios(config).then(function (res) {
         if (res.status === 200) {
           console.log("success");
-          alert("Product Added");
+          alert("Sevice Added");
           window.location.reload();
         }
       });
@@ -135,244 +117,344 @@ function Services() {
     }
   };
 
+  const handleMinInputChange = (e) => {
+    const newMinValue = parseInt(e.target.value, 10);
+    if (newMinValue < 1) {
+      setMinValue(1);
+    } else if (newMinValue > maxValue) {
+      setMinValue(maxValue);
+    } else {
+      setMinValue(newMinValue);
+    }
+  };
+
+  const handleMaxInputChange = (e) => {
+    const newMaxValue = parseInt(e.target.value, 10);
+    if (newMaxValue > 100000) {
+      setMaxValue(100000);
+    } else if (newMaxValue < minValue) {
+      setMaxValue(minValue);
+    } else {
+      setMaxValue(newMaxValue);
+    }
+  };
+
+  const columns = [
+    {
+      name: "S.No",
+      selector: (row, index) => index + 1,
+      width: "70px",
+    },
+    {
+      name: "Catagory Name",
+      selector: (row) => row.serviceCatagoryName,
+    },
+    {
+      name: "Subcatagory Name",
+      selector: (row) => row.serviceSubcatagoryName,
+    },
+    {
+      name: "Services Name",
+      selector: (row) => row.serviceProductName,
+    },
+    {
+      name: "Services Price",
+      selector: (row) => row.serviceProductPrice,
+      width: "100px",
+    },
+
+    {
+      name: "Services Range",
+      selector: (row) => row.serviceProductRange,
+      width: "100px",
+    },
+    {
+      name: "Services Brand",
+      selector: (row) => row.serviceProductBrand,
+      width: "100px",
+    },
+    {
+      name: "Image",
+      selector: (row) => (
+        <>
+          <img
+            src={`http://api.infinitimart.in/ServiceProductList/${row.serviceProductImage}`}
+            alt=""
+            style={{ padding: "7px", width: "100%" }}
+          />
+        </>
+      ),
+    },
+    {
+      name: "Description",
+      selector: (row, index) => row.serviceProductDescription,
+      width: "200px",
+    },
+    {
+      name: "Status",
+      selector: (row) => {
+        if (row.serviceProductStatus === "approved") {
+          return <p style={{ color: "#188c19", fontWeight: 600 }}>Approved</p>;
+        } else if (row.serviceProductStatus === "disapproved") {
+          return (
+            <p style={{ color: "#c0352f", fontWeight: 600 }}>Disapproved</p>
+          );
+        } else {
+          return (
+            <p style={{ color: "#ffbb00", fontWeight: 600 }}>Under Review</p>
+          );
+        }
+      },
+      width: "120px",
+    },
+    {
+      name: "Action",
+      selector: (row) => (
+        <>
+          <span>
+            <i
+              class="fa-solid fa-pen-to-square edit-icon"
+              title="Edit"
+              onClick={() => handleEdit(row)}
+            ></i>
+          </span>{" "}
+          /{" "}
+          <span>
+            <i
+              class="fa-solid fa-trash delete-icon"
+              title="Delete"
+              onClick={() => deleteService(row)}
+            ></i>
+          </span>
+        </>
+      ),
+    },
+  ];
+
+  const deleteService = async (data) => {
+    try {
+      axios
+        .post(
+          `http://api.infinitimart.in/api/vendor/services/productlist/deleteservice/` +
+            data._id
+        )
+        .then(function (res) {
+          if (res.status === 200) {
+            console.log(res.data);
+            alert(res.data.Success);
+            window.location.reload();
+          }
+        });
+    } catch (error) {
+      console.log(error);
+      alert("cannot able to do");
+    }
+  };
+
   return (
     <div className="row">
-      <div className="d-flex float-end mt-3 mb-3">
-        <button
-          className="btn-primary-button mx-2 addProduct"
-          style={selected == 1 ? active : inactive}
-          onClick={handleClick(1)}
-        >
-          Add Product
-        </button>
+      <h1> {!showEdit ? "SERVICES" : "EDIT SERVICES"} </h1>
 
-        <button
-          style={selected == 0 ? active : inactive}
-          onClick={handleClick(0)}
-          className="btn-secondary-button AllProduct"
-        >
-          All Product
-        </button>
+      <div className="d-flex float-end mt-3 mb-3">
+        {!showEdit && (
+          <>
+            <button
+              className="btn-primary-button mx-2 addProduct"
+              style={selected == 1 ? active : inactive}
+              onClick={handleClick(1)}
+            >
+              Add Service
+            </button>
+
+            <button
+              style={selected == 0 ? active : inactive}
+              onClick={handleClick(0)}
+              className="btn-secondary-button AllProduct"
+            >
+              All Services
+            </button>
+          </>
+        )}
       </div>
 
       <div>
         <div>
-          <h1>Services</h1>
-          {selected == 0 ? (
-            <>
-              <div className="float-end">
-                <ReactPaginate
-                  previousLabel={<i class="fa-solid fa-angles-left"></i>}
-                  nextLabel={<i class="fa-solid fa-angles-right"></i>}
-                  breakLabel={"..."}
-                  breakClassName={"break-me"}
-                  pageCount={pageCount}
-                  marginPagesDisplayed={2}
-                  pageRangeDisplayed={5}
-                  onPageChange={handlePageChange}
-                  containerClassName={"pagination"}
-                  subContainerClassName={"pages pagination"}
-                  activeClassName={"pagination-active"}
-                />
-              </div>{" "}
-              <table class="table table-hover table-bordered mt-5">
-                <thead className="text-align-center">
-                  <tr className="table-secondary ">
-                    <th>S.No</th>
-                    <th>Product Name</th>
-                    <th>Product Price</th>
-                    <th>Product Brand</th>
-                    <th>Product Size</th>
-                    <th>Product Volume</th>
-                    <th>Product Image</th>
-                    <th>Discount Percentage(%)</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Admin Review</th>
-                  </tr>
-                </thead>
-                <tbody className="justify-content-center">
-                  {currentPageData.map((ProductList, index) => {
-                    return (
-                      <tr className="user-tbale-body">
-                        <td>{index + 1}</td>
-                        <td>{ProductList?.serviceProductName}</td>
-                        <td>{ProductList?.serviceProductPrice}</td>
-                        <td className="text-center">
-                          {ProductList?.serviceProductBrand}
-                        </td>
-                        <td>{ProductList?.serviceProductSize}</td>
-                        <td>{ProductList?.serviceProductQuantity}</td>
-                        <td>
-                          <img
-                            src={imgURL+`/ServiceProductList/${ProductList.serviceProductImage}`}
-                            className="td-img"
-                            alt="..."
-                            style={{ width: "100%" }}
-                          />
-                        </td>
-                        <td>{ProductList.serviceProductDiscount}%</td>
-                        <td>{ProductList.serviceCatagoryName}</td>
-                        <td>{ProductList.serviceProductDescription}</td>
-                        <td style={{ color: "#0000ff" }}> Pending... </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>{" "}
-            </>
+          {selected === 0 && !showEdit ? (
+            <DataTable
+              columns={columns}
+              data={productData}
+              pagination
+              fixedHeader
+              selectableRowsHighlight
+              subHeaderAlign="left"
+              highlightOnHover
+            />
           ) : (
             <>
-              {" "}
-              <div className="card mt-4">
-                <div className="card-body p-3">
-                  {/* <div className="vhs-sub-heading pb-2">Add New Record</div> */}
+              {selected === 1 && !showEdit ? (
+                <div className="card mt-4">
+                  <div className="card-body p-3">
+                    {/* <div className="vhs-sub-heading pb-2">Add New Record</div> */}
 
-                  {/* <Form> */}
-                  <Row className="mb-3">
-                    <Col md={1}></Col>
-                    <Col md={5}>
-                      <Form.Group className="product-grid">
-                        <Form.Label>Select Catagory</Form.Label>
-                        <Form.Select
-                          defaultValue="Choose..."
-                          onChange={(e) => setcatagory(e.target.value)}
-                        >
-                          <option>Choose...</option>
-                          <option key={user?.id} value={user?.category}>
-                            {user?.category}{" "}
-                          </option>
-                        </Form.Select>
-                      </Form.Group>
-
-                      <Form.Group className="product-grid">
-                        <Form.Label>Product Name</Form.Label>
-                        <Form.Control
-                          name="Productname"
-                          // value={data.ProductName}
-                          onChange={(e) => setProductName(e.target.value)}
-                          type="text"
-                          placeholder="Enter Product"
-                        />
-                      </Form.Group>
-                      <Form.Group className="product-grid">
-                        <Form.Label>Product Price</Form.Label>
-                        {/* <Form.Control
-                          name="productPrice"
-                          // value={data.ProductPrice}
-                          onChange={(e) => setProductPrice(e.target.value)}
-                          type="number"
-                          placeholder="Enter Price"
-                        /> */}
-                      </Form.Group>
-                      <Form.Group
-                        controlId="formGridZip"
-                        className="product-grid"
-                      >
-                        <Form.Label>Product Volume</Form.Label>
-                        {/* <Form.Control
-                          type="number"
-                          name="volume"
-                          placeholder="Product Volume"
-                          // value={data.volume}
-                          onChange={(e) => setVolume(e.target.value)}
-                        /> */}
-                      </Form.Group>
-                      <Form.Group className="product-grid">
-                        <Form.Label>Choose Image</Form.Label>
-                        <Form.Control
-                          name="image"
-                          type="file"
-                          // multiple
-                          // value={data.image}
-                          onChange={(e) => setImage(e.target.files[0])}
-                        />
-                      </Form.Group>
-                      <br />
-                      <Button
-                        onClick={addServiceProducts}
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal"
-                      >
-                        Save
-                      </Button>
-                    </Col>
-                    <Col md={5}>
-                      <Form.Group className="product-grid">
-                        <Form.Label>Select Subcatagory</Form.Label>
-                        <Form.Select
-                          defaultValue="Choose..."
-                          onChange={(e) => setSubcatagory(e.target.value)}
-                        >
-                          <option>Choose...</option>
-                          {subcatagorydata?.map((e) => (
-                            <option key={e.id} value={e.id}>
-                              {e.SubcatagoryName}{" "}
+                    {/* <Form> */}
+                    <Row className="mb-3">
+                      <Col md={1}></Col>
+                      <Col md={5}>
+                        <Form.Group className="product-grid">
+                          <Form.Label>Select Catagory</Form.Label>
+                          <Form.Select
+                            defaultValue="Choose..."
+                            onChange={(e) => setcatagory(e.target.value)}
+                          >
+                            <option>Choose...</option>
+                            <option key={user?.id} value={user?.category}>
+                              {user?.category}{" "}
                             </option>
-                          ))}
-                        </Form.Select>
-                      </Form.Group>
-                      <Form.Group className="product-grid">
-                        <Form.Label>Product Brand</Form.Label>
-                        <Form.Control
-                          name="brand"
-                          placeholder="Product Brand"
-                          // value={data.brand}
-                          onChange={(e) => setBrand(e.target.value)}
-                        />
-                      </Form.Group>
-                      <Form.Group className="product-grid">
-                        <Form.Label>Product Size</Form.Label>
-                        <Form.Select
-                          name="size"
-                          defaultValue="Choose..."
-                          // value={data.size}
-                          onChange={(e) => setSize(e.target.value)}
+                          </Form.Select>
+                        </Form.Group>
+
+                        <Form.Group className="product-grid">
+                          <Form.Label>Services Name</Form.Label>
+                          <Form.Control
+                            name="Productname"
+                            // value={data.ProductName}
+                            onChange={(e) => setProductName(e.target.value)}
+                            type="text"
+                            placeholder="Enter Service"
+                          />
+                        </Form.Group>
+                        <Form.Group className="product-grid">
+                          <Form.Label>Services Price</Form.Label>
+                          <Form.Control
+                            name="Product Price"
+                            // value={data.ProductName}
+                            onChange={(e) => setProductPrice(e.target.value)}
+                            type="number"
+                            placeholder="Enter Price"
+                          />
+                        </Form.Group>
+                        <Form.Group className="product-grid">
+                          <Form.Label>Choose Image</Form.Label>
+                          <Form.Control
+                            name="image"
+                            type="file"
+                            // multiple
+                            // value={data.image}
+                            onChange={(e) => setImage(e.target.files[0])}
+                          />
+                        </Form.Group>
+                        <br />
+                        <Button
+                          onClick={addServiceProducts}
+                          type="button"
+                          class="btn btn-secondary"
+                          data-bs-dismiss="modal"
                         >
-                          <option>Choose...</option>
-                          <option value="38x 28x 18cm">38x 28x 18cm</option>
-                          <option value="12Lx 12Wx 11H cm">
-                            12Lx 12Wx 11H cm
-                          </option>
-                          <option value="28 x20x7.6 cm">28 x20x7.6 cm </option>
-                          <option value="22.5x 11 x10.5cm">
-                            22.5x 11 x10.5cm
-                          </option>
-                        </Form.Select>
-                      </Form.Group>
+                          Save
+                        </Button>
+                      </Col>
+                      <Col md={5}>
+                        <Form.Group className="product-grid">
+                          <Form.Label>Select Subcatagory</Form.Label>
+                          <Form.Select
+                            defaultValue="Choose..."
+                            onChange={(e) => setSubcatagory(e.target.value)}
+                          >
+                            <option>Choose...</option>
+                            {subcatagorydata?.map((e) => (
+                              <option key={e.id} value={e.id}>
+                                {e.SubcatagoryName}{" "}
+                              </option>
+                            ))}
+                          </Form.Select>
+                        </Form.Group>
+                        <Form.Group className="product-grid">
+                          <Form.Label>Service Brand</Form.Label>
+                          <Form.Control
+                            name="brand"
+                            placeholder="Service Brand"
+                            // value={data.brand}
+                            onChange={(e) => setBrand(e.target.value)}
+                          />
+                        </Form.Group>
 
-                      {/* <Form.Group
-                        controlId="formGridZip"
-                        className="product-grid"
-                      >
-                        <Form.Label>
-                          Customer Discount Percentage(%){" "}
-                        </Form.Label>
-                        <Form.Control
-                          name="discount"
-                          placeholder="Customer Discount Percentage"
-                          // value={data.discount}
-                          onChange={(e) => setDiscount(e.target.value)}
-                        />
-                      </Form.Group> */}
-                      <Form.Group className="mb-3 product-grid">
-                        <Form.Label>Description</Form.Label>
-                        <Form.Control
-                          name="discription"
-                          as="textarea"
-                          rows={3}
-                          // value={data.discription}
-                          onChange={(e) => setDescription(e.target.value)}
-                        />
-                      </Form.Group>
-                    </Col>
-                    <Col md={1}></Col>
-                  </Row>
+                        <Form.Group
+                          controlId="formGridZip"
+                          className="product-grid"
+                        >
+                          <Form.Label className="mb-3">
+                            Service Range
+                          </Form.Label>
+                          <div className="d-flex mb-4 ">
+                            <div>
+                              <label
+                                style={{
+                                  color: "#a9042e",
+                                  fontSize: "11px",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                Min Value:
+                              </label>{" "}
+                              <input
+                                type="number"
+                                placeholder="1"
+                                style={{ width: "50%" }}
+                                value={minValue}
+                                onChange={handleMinInputChange}
+                              />
+                            </div>
+                            <div>
+                              <label
+                                style={{
+                                  color: "#a9042e",
+                                  fontSize: "11px",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                Max Value:
+                              </label>{" "}
+                              <input
+                                type="number"
+                                placeholder="100000"
+                                style={{ width: "50%" }}
+                                value={maxValue}
+                                onChange={handleMaxInputChange}
+                              />
+                            </div>
+                          </div>
+                          <InputRange
+                            maxValue={100000}
+                            minValue={1}
+                            value={{ min: minValue, max: maxValue }}
+                            onChange={(newRange) => {
+                              setMinValue(newRange.min);
+                              setMaxValue(newRange.max);
+                            }}
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3 product-grid">
+                          <Form.Label>Description</Form.Label>
+                          <Form.Control
+                            name="discription"
+                            as="textarea"
+                            rows={3}
+                            // value={data.discription}
+                            onChange={(e) => setDescription(e.target.value)}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={1}></Col>
+                    </Row>
 
-                  {/* </Form> */}
+                    {/* </Form> */}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  {showEdit ? <EditServices servicesData={EditService} /> : ""}
+                </>
+              )}
             </>
           )}
         </div>

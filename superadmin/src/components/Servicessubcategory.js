@@ -7,26 +7,43 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/layout/Sidebar";
 import ReactPaginate from "react-paginate";
+import DataTable from "react-data-table-component";
+import { Modal } from "react-bootstrap";
 
 function ServicessubCategory() {
-  const apiURL = process.env.REACT_APP_API_URL;
-  const imgURL = process.env.REACT_APP_IMAGE_API_URL;
   const [catagory, setCatagory] = useState([]);
-  const [Subcatagory, setSubcatagory] = useState([]);
+  const [subCatagory, setSubcatagory] = useState([]);
   const [catagoryName, setCatagoryName] = useState("");
   const [subcatagoryName, setSubcatagoryName] = useState("");
   const [subcatagory_image, setSubcatagory_image] = useState();
+  //search
+  const [searchServiceSubCategory, setServiceSearchSubCategory] = useState("");
+  const [filterdata, setfilterdata] = useState([]);
+  // Edit
+  const [editCatagoryName, setEditCatagoryName] = useState("");
+  const [editSubcategoryName, setEditSubcategoryName] = useState("");
+  const [editSubcatagoryImage, setEditSubcatagoryImage] = useState(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editSubcategory, setEditSubcategory] = useState({});
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  //pagination
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 10; // Number of items to display per page
-  const pageCount = Math.ceil(Subcatagory.length / itemsPerPage);
-  const offset = currentPage * itemsPerPage;
-  const currentPageData = Subcatagory.slice(offset, offset + itemsPerPage);
+  const handleEdit = (subcategory) => {
+    setEditSubcategory(subcategory);
+    handleShowPopUp(true);
+  };
 
-  // Handle page change
-  const handlePageChange = ({ selected }) => {
-    setCurrentPage(selected);
+  const handleShowPopUp = () => {
+    setShowEdit(true);
+  };
+  const handleClose = () => {
+    setShowEdit(false); // Hide the edit form after submitting it or canceling it by pressing
+  };
+
+  //choose image
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    setSelectedImage(URL.createObjectURL(file));
+    setEditSubcatagoryImage(file);
   };
 
   const AddSubCatagory = async (e) => {
@@ -39,14 +56,15 @@ function ServicessubCategory() {
       const config = {
         url: "/vendor/services/subcatagory/addsubcatagoryservices",
         method: "post",
-        baseURL: apiURL,
+        baseURL: "http://api.infinitimart.in/api",
         data: formdata,
       };
       await axios(config).then(function (res) {
         if (res.status === 200) {
           console.log("success");
-          alert("Subcatagory Added");
-          window.location.reload();
+          alert(res.data.message);
+          getAllSubCatagory();
+          // window.location.reload();
         }
       });
     } catch (error) {
@@ -62,7 +80,7 @@ function ServicessubCategory() {
 
   const getAllCatagory = async () => {
     let res = await axios.get(
-      apiURL+"/vendor/services/catagory/getservicecatagory"
+      "http://api.infinitimart.in/api/vendor/services/catagory/getservicecatagory"
     );
     if (res.status === 200) {
       console.log("catagory===", res);
@@ -72,25 +90,27 @@ function ServicessubCategory() {
 
   const getAllSubCatagory = async () => {
     let res = await axios.get(
-      apiURL+"/vendor/services/subcatagory/getsubcatagoryservices"
+      "http://api.infinitimart.in/api/vendor/services/subcatagory/getsubcatagoryservices"
     );
     if (res.status === 200) {
       console.log("subcatagory===", res);
       setSubcatagory(res.data?.subcategory);
+      setfilterdata(res.data?.subcategory);
     }
   };
 
-  const deletecatagory = async (data) => {
+  const deleteSubCatagory = async (data) => {
     try {
       axios
         .post(
-          apiURL+`vendor/services/subcatagory/deletesubcatagoryservices/` +
+          `http://api.infinitimart.in/api/vendor/services/subcatagory/deletesubcatagoryservices/` +
             data._id
         )
         .then(function (res) {
           if (res.status === 200) {
             console.log(res.data);
-            window.location.reload();
+            alert(res.data.success);
+            getAllSubCatagory();
           }
         });
     } catch (error) {
@@ -99,91 +119,140 @@ function ServicessubCategory() {
     }
   };
 
-  var i = 1;
+  const updateSubCategory = async () => {
+    try {
+      const subCategoryId = editSubcategory._id;
+      const formdata = new FormData();
+      formdata.append("catagoryName", editCatagoryName);
+      formdata.append("SubcatagoryName", editSubcategoryName);
+      if (editSubcatagoryImage) {
+        formdata.append("SubcatagoryImage", editSubcatagoryImage);
+      }
+
+      const config = {
+        url: `/vendor/services/subcatagory/updateservicesubcategory/${subCategoryId}`,
+        method: "post",
+        baseURL: "http://api.infinitimart.in/api",
+        data: formdata,
+      };
+      const response = await axios(config);
+      if (response.status === 200) {
+        console.log("success");
+        alert(response.data.message);
+        getAllSubCatagory(); // Refresh the subcategory list
+        setShowEdit(false); // Close the modal
+      }
+    } catch (error) {
+      console.log(error);
+      alert("Unable to complete the request");
+    }
+  };
+
+  const columns = [
+    {
+      name: "S.No",
+      selector: (row, index) => index + 1,
+    },
+    {
+      name: "Category",
+      selector: (row, index) => row.catagoryName,
+    },
+    {
+      name: "Subcategory",
+      selector: (row, index) => row.SubcatagoryName,
+    },
+    {
+      name: "Image",
+      selector: (row, index) => (
+        <>
+          <img
+            src={`http://api.infinitimart.in/servicesubcatagory/${row.SubcatagoryImage}`}
+            alt=""
+            width="50%"
+          />
+        </>
+      ),
+    },
+    {
+      name: "Action",
+      selector: (row) => (
+        <>
+          <span>
+            <i
+              class="fa-solid fa-pen-to-square edit-icon"
+              title="Edit"
+              onClick={() => handleEdit(row)}
+            ></i>
+          </span>{" "}
+          /{" "}
+          <span>
+            <i
+              class="fa-solid fa-trash delete-icon"
+              title="Delete"
+              style={{ color: "#a9042e", cursor: "pointer" }}
+              onClick={() => deleteSubCatagory(row)}
+            ></i>
+          </span>
+        </>
+      ),
+    },
+  ];
+
+  useEffect(() => {
+    const searchResults = () => {
+      let results = subCatagory;
+      if (searchServiceSubCategory) {
+        results = results.filter(
+          (item) =>
+            item.SubcatagoryName &&
+            item.SubcatagoryName.toLowerCase().includes(
+              searchServiceSubCategory.toLowerCase()
+            )
+        );
+      }
+      setfilterdata(results);
+    };
+    searchResults();
+  }, [searchServiceSubCategory]);
 
   return (
-    <div className="row">
-      <div className="col-md-2">
-        <Sidebar />
-      </div>
-      <div className="col-md-10 pt-3">
-        <div className="mt-3 p-2">
-          <h4>Service Subcatagory </h4>
-        </div>
+    <div>
+      <div>
         <div
           className="d-flex pt-3 pb-3"
           style={{ justifyContent: "space-between" }}
         >
-          <button
-            type="button"
-            class="btn btn-primary _btn"
-            data-bs-toggle="modal"
-            data-bs-target="#exampleModal"
-          >
-            Add Subcategory
-          </button>
-          <ReactPaginate
-            previousLabel={"Previous"}
-            nextLabel={"Next"}
-            breakLabel={"..."}
-            breakClassName={"break-me"}
-            pageCount={pageCount}
-            marginPagesDisplayed={2}
-            pageRangeDisplayed={5}
-            onPageChange={handlePageChange}
-            containerClassName={"pagination"}
-            subContainerClassName={"pages pagination"}
-            activeClassName={"pagination-active"}
-          />
+          <div>
+            <Form.Control
+              type="text"
+              placeholder="Search by Subcategory"
+              onChange={(e) => setServiceSearchSubCategory(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <button
+              type="button"
+              class="btn btn-primary _btn"
+              data-bs-toggle="modal"
+              data-bs-target="#exampleModal"
+            >
+              Add Subcategory
+            </button>
+          </div>
         </div>
-        <table class="table table-hover table-bordered mt-2">
-          <thead className="">
-            <tr className="table-secondary">
-              <th className="table-head" scope="col">
-                S.No
-              </th>
-              <th className="table-head" scope="col">
-                Category Name
-              </th>
-              <th className="table-head" scope="col">
-                Subcategory Name
-              </th>
-              <th className="table-head" scope="col">
-                Subcategory Image
-              </th>
-              <th className="table-head" style={{ width: "10%" }} scope="col">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentPageData?.map((data) => (
-              <tr className="user-tbale-body">
-                <td className="text-center">{i++} </td>
-                <td className="text-center">{data.catagoryName}</td>
-                <td className="text-center"> {data.SubcatagoryName} </td>
-                <td style={{ textAlign: "center" }}>
-                  <img
-                    src={imgURL+`/servicesubcatagory/${data.SubcatagoryImage}`}
-                    alt=""
-                    width="15%"
-                  />
-                </td>
-                <td className="text-center">
-                  <i
-                    title="Delete"
-                    class="fa-solid fa-trash"
-                    style={{ color: "#a9042e", cursor: "pointer" }}
-                    onClick={() => deletecatagory(data)}
-                  ></i>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>{" "}
+        <DataTable
+          columns={columns}
+          data={filterdata}
+          pagination
+          fixedHeader
+          selectableRowsHighlight
+          subHeaderAlign="left"
+          highlightOnHover
+        />
       </div>
 
-      {/* Modal */}
+      {/* Modal =================Add=================*/}
 
       <div
         class="modal fade"
@@ -252,6 +321,71 @@ function ServicessubCategory() {
           </div>
         </div>
       </div>
+      {/* Edit Modal ===========================================*/}
+      <Modal
+        show={showEdit}
+        onHide={handleClose}
+        keyboard={false}
+        backdrop="static"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Edit</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h5>Select Category</h5>
+          <select
+            className="p-2"
+            // defaultValue={editSubcategory?.SubcatagoryName}
+            style={{ width: "70%" }}
+            onChange={(e) => {
+              setEditCatagoryName(e.target.value);
+            }}
+          >
+            {catagory.map((data) => (
+              <option value={data.categoryname}>{data.categoryname} </option>
+            ))}
+          </select>
+          <br /> <br />
+          <h5>Subcategory Name</h5>
+          <input
+            className="p-2"
+            style={{ width: "70%" }}
+            defaultValue={editSubcategory?.SubcatagoryName}
+            onChange={(e) => {
+              setEditSubcategoryName(e.target.value);
+            }}
+          />
+          <br /> <br />
+          <h5>Image</h5>
+          {!selectedImage && (
+            <img
+              src={`http://api.infinitimart.in/servicesubcatagory/${editSubcategory?.SubcatagoryImage}`}
+              alt=""
+              width="25%"
+            />
+          )}
+          <div className="ms-2 ">
+            {selectedImage && (
+              <img
+                className="edit-product-image"
+                src={selectedImage}
+                alt="Uploaded"
+                width="25%"
+              />
+            )}
+          </div>{" "}
+          <br />
+          <div className="ms-2 ">
+            <label className="pb-2 edit-lable">Upload Subcategory Image</label>
+            <input type="file" onChange={handleImageChange} />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <button className="update-button" onClick={updateSubCategory}>
+            Update
+          </button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
